@@ -193,7 +193,7 @@ export default function ReportsPage() {
                 onClick={() => setDatePreset(item.id as any)}
                 className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all flex-shrink-0 ${
                   datePreset === item.id
-                    ? 'bg-gold-600 text-white shadow-2xs'
+                    ? 'bg-ink-900 text-white shadow-2xs'
                     : 'text-ink-500 hover:text-ink-900 hover:bg-ink-100/30'
                 }`}
               >
@@ -207,7 +207,7 @@ export default function ReportsPage() {
             className="flex items-center justify-center gap-1 bg-ink-900 hover:bg-ink-700 text-white px-4 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-colors shadow-2xs select-none min-h-[44px]"
             title="Download CSV for Excel/GST filing"
           >
-            <Download className="w-3.5 h-3.5 text-gold-500" /> Export
+            <Download className="w-3.5 h-3.5 text-white" /> Export
           </button>
         </div>
       </div>
@@ -219,7 +219,7 @@ export default function ReportsPage() {
         <div className="bg-white border border-ink-100 p-6 rounded-2xl shadow-[0_1px_3px_rgba(26,24,20,0.02),0_8px_24px_-12px_rgba(26,24,20,0.05)] space-y-2 relative overflow-hidden">
           <div className="flex justify-between items-start">
             <span className="text-[10px] text-ink-500 uppercase tracking-widest font-bold block">Total Billed Sales</span>
-            <span className="p-2.5 rounded-xl bg-paper border border-ink-100 text-gold-600 flex-shrink-0">
+            <span className="p-2.5 rounded-xl bg-paper border border-ink-100 text-ink-700 flex-shrink-0">
               <TrendingUp className="w-4 h-4" />
             </span>
           </div>
@@ -236,11 +236,11 @@ export default function ReportsPage() {
         <div className="bg-white border border-ink-100 p-6 rounded-2xl shadow-[0_1px_3px_rgba(26,24,20,0.02),0_8px_24px_-12px_rgba(26,24,20,0.05)] space-y-2 relative overflow-hidden">
           <div className="flex justify-between items-start">
             <span className="text-[10px] text-ink-500 uppercase tracking-widest font-bold block">GST Tax Collected</span>
-            <span className="p-2.5 rounded-xl bg-gold-100/50 border border-gold-600/10 text-gold-600 flex-shrink-0">
+            <span className="p-2.5 rounded-xl bg-ink-100/80 border border-ink-100 text-ink-705 flex-shrink-0">
               <Scale className="w-4 h-4" />
             </span>
           </div>
-          <div className="text-2xl font-bold text-gold-600 font-mono tracking-tight">
+          <div className="text-2xl font-bold text-ink-900 font-mono tracking-tight">
             {fmt(totalTax)}
           </div>
           <div className="text-[10px] text-ink-300 font-medium pt-2 border-t border-ink-100/50 flex justify-between">
@@ -253,7 +253,7 @@ export default function ReportsPage() {
         <div className="bg-white border border-ink-100 p-6 rounded-2xl shadow-[0_1px_3px_rgba(26,24,20,0.02),0_8px_24px_-12px_rgba(26,24,20,0.05)] space-y-2 relative overflow-hidden">
           <div className="flex justify-between items-start">
             <span className="text-[10px] text-ink-500 uppercase tracking-widest font-bold block">Invoices Billed</span>
-            <span className="p-2.5 rounded-xl bg-paper border border-ink-100 text-gold-600 flex-shrink-0">
+            <span className="p-2.5 rounded-xl bg-paper border border-ink-100 text-ink-700 flex-shrink-0">
               <Receipt className="w-4 h-4" />
             </span>
           </div>
@@ -275,7 +275,7 @@ export default function ReportsPage() {
         <div className="space-y-6">
           <div className="bg-white border border-ink-100 p-6 rounded-2xl shadow-[0_1px_3px_rgba(26,24,20,0.02),0_8px_24px_-12px_rgba(26,24,20,0.05)] space-y-4">
             <h3 className="font-serif text-sm font-bold text-ink-900 flex items-center gap-2">
-              <Tag className="w-4 h-4 text-gold-600" />
+              <Tag className="w-4 h-4 text-ink-700" />
               Category Revenue Share
             </h3>
             
@@ -294,7 +294,7 @@ export default function ReportsPage() {
                     </div>
                     <div className="h-2 w-full bg-paper rounded-full overflow-hidden border border-ink-100">
                       <div 
-                        className="h-full bg-gold-600 rounded-full" 
+                        className="h-full bg-ink-900 rounded-full" 
                         style={{ width: `${percentage}%` }}
                       />
                     </div>
@@ -309,7 +309,7 @@ export default function ReportsPage() {
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-white border border-ink-100 p-5 md:p-6 rounded-2xl shadow-[0_1px_3px_rgba(26,24,20,0.02),0_8px_24px_-12px_rgba(26,24,20,0.05)] space-y-4">
             <h3 className="font-serif text-sm font-bold text-ink-900 flex items-center gap-2">
-              <History className="w-4 h-4 text-gold-600" />
+              <History className="w-4 h-4 text-ink-700" />
               Recent Billings Ledger
             </h3>
 
@@ -351,7 +351,7 @@ export default function ReportsPage() {
                           {log.customer.name}
                         </td>
                         <td className="py-3.5 px-3 text-center">
-                          <span className="px-2 py-0.5 rounded-md border border-gold-600/10 bg-gold-100/50 text-[9px] uppercase text-gold-600 font-bold tracking-wide">
+                          <span className="px-2 py-0.5 rounded-md border border-ink-100 bg-ink-100 text-[9px] uppercase text-ink-700 font-bold tracking-wide">
                             {log.paymentMode}
                           </span>
                         </td>
@@ -381,7 +381,7 @@ export default function ReportsPage() {
                         <span className="font-mono text-[10px] font-bold text-ink-900">
                           {log.orderId || 'Draft'}
                         </span>
-                        <span className="text-[8px] bg-gold-100/50 border border-gold-600/10 text-gold-600 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">
+                        <span className="text-[8px] bg-ink-100 border border-ink-100/35 text-ink-700 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">
                           {log.paymentMode}
                         </span>
                       </div>
@@ -398,9 +398,9 @@ export default function ReportsPage() {
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <div className="text-right">
                         <span className="block text-[8px] text-ink-300 uppercase tracking-wider font-bold">Total Billed</span>
-                        <span className="font-bold text-ink-950 font-mono text-xs tabular-nums">{fmt(log.totalAmount)}</span>
+                        <span className="font-bold text-ink-955 font-mono text-xs tabular-nums">{fmt(log.totalAmount)}</span>
                       </div>
-                      <ChevronRight className="w-4 h-4 text-ink-300 group-hover:text-gold-600 transition-colors" />
+                      <ChevronRight className="w-4 h-4 text-ink-300 group-hover:text-ink-800 transition-colors" />
                     </div>
                   </Link>
                 ))

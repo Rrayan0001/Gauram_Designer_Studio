@@ -146,14 +146,14 @@ export default function Dashboard() {
             <h4 className="text-xs font-bold text-ink-900 uppercase tracking-wider">Revenue Trend</h4>
             <p className="text-[10px] text-ink-500">Monthly settled boutique invoicing</p>
           </div>
-          <span className="text-[10px] font-bold text-gold-600 bg-gold-100/50 border border-gold-600/10 px-2.5 py-0.5 rounded-full">6 Months</span>
+          <span className="text-[10px] font-bold text-ink-700 bg-ink-100 border border-ink-100 px-2.5 py-0.5 rounded-full">6 Months</span>
         </div>
 
         <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-36 overflow-visible font-sans text-[9px] font-medium fill-ink-500">
           <defs>
             <linearGradient id="area-grad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#c9a961" stopOpacity="0.25" />
-              <stop offset="100%" stopColor="#c9a961" stopOpacity="0.00" />
+              <stop offset="0%" stopColor="#6b6359" stopOpacity="0.15" />
+              <stop offset="100%" stopColor="#6b6359" stopOpacity="0.00" />
             </linearGradient>
           </defs>
 
@@ -166,7 +166,7 @@ export default function Dashboard() {
           {areaPath && <path d={areaPath} fill="url(#area-grad)" />}
 
           {/* Line Path */}
-          {linePath && <path d={linePath} fill="none" stroke="#b08d3f" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />}
+          {linePath && <path d={linePath} fill="none" stroke="#1a1814" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />}
 
           {/* Data Points */}
           {points.map((p, idx) => (
@@ -176,7 +176,7 @@ export default function Dashboard() {
                 cy={p.y}
                 r="4.5"
                 fill="#ffffff"
-                stroke="#b08d3f"
+                stroke="#1a1814"
                 strokeWidth="2"
                 className="transition-all hover:r-6 cursor-pointer"
               />
@@ -202,17 +202,17 @@ export default function Dashboard() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="font-serif text-2xl md:text-3xl font-bold text-ink-900 tracking-tight flex items-center gap-2">
-            {greeting}, <span className="text-gold-600">Gauram Studio</span>
+            {greeting}, <span className="text-ink-950 font-serif">Gauram Studio</span>
           </h1>
           <p className="text-xs text-ink-500 mt-1 font-medium flex items-center gap-1.5">
-            <Calendar className="w-3.5 h-3.5 text-gold-600" /> Stylist counter ledger dashboard &amp; billing panel
+            <Calendar className="w-3.5 h-3.5 text-ink-550" /> Stylist counter ledger dashboard &amp; billing panel
           </p>
         </div>
         <Link
           href="/invoices/new"
           className="flex items-center justify-center gap-2 bg-ink-900 hover:bg-ink-700 text-white px-5 py-3 rounded-xl text-xs font-bold tracking-wide transition-all shadow-[0_4px_12px_rgba(26,24,20,0.08)] active:scale-[0.98] w-full sm:w-auto min-h-[44px]"
         >
-          <PlusCircle className="w-4 h-4 text-gold-500" />
+          <PlusCircle className="w-4 h-4 text-ink-300" />
           Create Bill
         </Link>
       </div>
@@ -220,10 +220,10 @@ export default function Dashboard() {
       {/* 4 Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Total Revenue', value: fmt(totalSales), sub: 'Paid in full at checkout', icon: <TrendingUp className="w-5 h-5 text-gold-600" /> },
-          { label: 'Invoices Issued', value: String(totalBillsCount), sub: 'Printed boutique receipts', icon: <Receipt className="w-5 h-5 text-gold-600" /> },
-          { label: 'Average Bill Value', value: fmt(avgBillValue), sub: 'Average cart per client', icon: <Layers className="w-5 h-5 text-gold-600" /> },
-          { label: 'This Month\'s Sales', value: fmt(thisMonthSales), sub: 'Current calendar billing', icon: <Sparkles className="w-5 h-5 text-gold-600" /> },
+          { label: 'Total Revenue', value: fmt(totalSales), sub: 'Paid in full at checkout', icon: <TrendingUp className="w-5 h-5 text-ink-700" /> },
+          { label: 'Invoices Issued', value: String(totalBillsCount), sub: 'Printed boutique receipts', icon: <Receipt className="w-5 h-5 text-ink-700" /> },
+          { label: 'Average Bill Value', value: fmt(avgBillValue), sub: 'Average cart per client', icon: <Layers className="w-5 h-5 text-ink-700" /> },
+          { label: 'This Month\'s Sales', value: fmt(thisMonthSales), sub: 'Current calendar billing', icon: <Sparkles className="w-5 h-5 text-ink-700" /> },
         ].map(({ label, value, sub, icon }) => (
           <div key={label} className="bg-white rounded-2xl border border-ink-100 p-4 md:p-5 shadow-[0_1px_3px_rgba(26,24,20,0.02),0_8px_24px_-12px_rgba(26,24,20,0.05)] select-none">
             <div className="flex items-start justify-between">
@@ -232,7 +232,7 @@ export default function Dashboard() {
                 <p className="text-lg md:text-xl font-bold text-ink-900 tracking-tight font-mono break-all">{value}</p>
                 <p className="text-[10px] text-ink-300 font-medium leading-tight">{sub}</p>
               </div>
-              <div className="p-2 md:p-2.5 bg-paper rounded-xl border border-ink-100 flex-shrink-0">{icon}</div>
+              <div className="p-2 md:p-2.5 bg-ink-100/60 border border-ink-100/40 rounded-xl flex-shrink-0">{icon}</div>
             </div>
           </div>
         ))}
@@ -266,7 +266,7 @@ export default function Dashboard() {
                   placeholder="Search orders..."
                   value={search}
                   onChange={e => setSearch(e.target.value)}
-                  className="w-full pr-4 py-2.5 text-xs border border-ink-100 rounded-xl focus:outline-none focus:border-gold-600 bg-white placeholder-ink-300 text-ink-900 font-medium transition-all"
+                  className="w-full pr-4 py-2.5 text-xs border border-ink-100 rounded-xl focus:outline-none focus:border-ink-500 bg-white placeholder-ink-300 text-ink-900 font-medium transition-all"
                   style={{ paddingLeft: '2.5rem' }}
                 />
               </div>
@@ -277,7 +277,7 @@ export default function Dashboard() {
                 onClick={() => setShowMobileFilters(!showMobileFilters)}
                 className={`md:hidden flex items-center justify-center p-2.5 rounded-xl border transition-all min-w-[44px] min-h-[44px] ${
                   showMobileFilters || startDate || endDate
-                    ? 'bg-gold-600 border-gold-600 text-white shadow-2xs'
+                    ? 'bg-ink-900 border-ink-900 text-white shadow-2xs'
                     : 'bg-white border-ink-100 text-ink-500 hover:text-ink-900'
                 }`}
                 title="Filter by dates"
@@ -365,7 +365,7 @@ export default function Dashboard() {
                       {new Date(inv.invoiceDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                     </td>
                     <td className="px-5 py-4 text-center">
-                      <span className="bg-gold-100/50 border border-gold-600/10 text-gold-600 font-semibold px-2.5 py-0.5 rounded-md text-[10px] uppercase tracking-wide">
+                      <span className="bg-ink-100 border border-ink-100/30 text-ink-700 font-bold px-2.5 py-0.5 rounded-md text-[10px] uppercase tracking-wide">
                         {inv.paymentMode}
                       </span>
                     </td>
@@ -376,7 +376,7 @@ export default function Dashboard() {
                       <Link href={`/invoices/${inv.id}`}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-ink-100 hover:border-ink-300 hover:bg-white text-ink-700 hover:text-ink-900 text-[10px] font-bold transition-all shadow-2xs"
                       >
-                        Receipt <ArrowRight className="w-3 h-3 text-gold-600" />
+                        Receipt <ArrowRight className="w-3 h-3 text-ink-500" />
                       </Link>
                     </td>
                   </tr>
@@ -414,7 +414,7 @@ export default function Dashboard() {
                     <span className="font-mono text-[10px] font-bold text-ink-900 break-all">
                       {inv.orderId || 'Draft'}
                     </span>
-                    <span className="text-[9px] bg-gold-100/50 border border-gold-600/10 text-gold-600 px-1.5 py-0.5 rounded font-bold tracking-wide uppercase">
+                    <span className="text-[9px] bg-ink-100 border border-ink-100/35 text-ink-700 px-1.5 py-0.5 rounded font-bold tracking-wide uppercase">
                       {inv.paymentMode}
                     </span>
                   </div>
@@ -433,7 +433,7 @@ export default function Dashboard() {
                     <span className="block text-[8px] text-ink-300 uppercase tracking-wider font-bold">Total</span>
                     <span className="font-bold text-ink-950 font-mono tabular-nums text-xs">{fmt(inv.totalAmount)}</span>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-ink-300 group-hover:text-gold-600 transition-colors" />
+                  <ChevronRight className="w-4 h-4 text-ink-300 group-hover:text-ink-800 transition-colors" />
                 </div>
               </Link>
             ))

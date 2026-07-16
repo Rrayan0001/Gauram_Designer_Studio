@@ -110,18 +110,18 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                     onClick={() => { router.push(item.href); onClose() }}
                     onMouseEnter={() => setSelectedIndex(idx)}
                     className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left transition-all ${
-                      active ? 'bg-gold-100/50 text-ink-900' : 'text-ink-700 hover:bg-ink-100/30'
+                      active ? 'bg-ink-100/70 text-ink-900' : 'text-ink-700 hover:bg-ink-100/30'
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <Icon className={`w-4 h-4 ${active ? 'text-gold-600' : 'text-ink-300'}`} />
+                      <Icon className={`w-4 h-4 ${active ? 'text-ink-700' : 'text-ink-300'}`} />
                       <div>
                         <span className="text-xs font-semibold block">{item.name}</span>
                         <span className="text-[9px] text-ink-500 tracking-wider uppercase font-medium">{item.category}</span>
                       </div>
                     </div>
                     {active && (
-                      <span className="flex items-center gap-0.5 text-[9px] text-gold-600 font-semibold bg-white border border-gold-600/20 px-1.5 py-0.5 rounded shadow-sm">
+                      <span className="flex items-center gap-0.5 text-[9px] text-ink-700 font-semibold bg-white border border-ink-300/35 px-1.5 py-0.5 rounded shadow-sm">
                         Go <CornerDownLeft className="w-2.5 h-2.5" />
                       </span>
                     )}

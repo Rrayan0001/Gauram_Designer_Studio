@@ -148,7 +148,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
           {/* Delete Invoice */}
           <button
             onClick={() => setShowDeleteConfirm(true)}
-            className="flex items-center justify-center gap-1.5 px-3 py-2 border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs rounded-xl transition-all font-semibold min-h-[44px]"
+            className="flex items-center justify-center gap-1.5 px-3 py-2 border border-rose-205 text-rose-600 hover:bg-rose-50 text-xs rounded-xl transition-all font-semibold min-h-[44px]"
           >
             <Trash2 className="w-4 h-4" />
             Delete
@@ -190,16 +190,16 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
       </div>
 
       {/* Printable Invoice Page Card */}
-      <div className="print-container bg-white border border-gold-600/30 p-5 sm:p-8 md:p-12 rounded-3xl shadow-xl relative overflow-hidden text-ink-900">
+      <div className="print-container bg-white border border-ink-100/60 p-5 sm:p-8 md:p-12 rounded-3xl shadow-xl relative overflow-hidden text-ink-900">
         
         {/* Monogram Watermark Background (Faint centered logo, constrained size on mobile) */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none opacity-[0.04] p-4">
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none opacity-[0.03] p-4">
           <img src="/logo.png" alt="Monogram Watermark" className="w-72 h-72 sm:w-96 sm:h-96 max-w-[16rem] max-h-[16rem] sm:max-w-none object-contain aspect-square" />
         </div>
 
         {/* Decorative corner borders (Hidden in Print, constrained size on mobile) */}
-        <div className="no-print absolute top-0 left-0 w-16 h-16 sm:w-24 sm:h-24 border-t-2 border-l-2 border-gold-600/20 pointer-events-none rounded-tl-3xl" />
-        <div className="no-print absolute bottom-0 right-0 w-16 h-16 sm:w-24 sm:h-24 border-b-2 border-r-2 border-gold-600/20 pointer-events-none rounded-br-3xl" />
+        <div className="no-print absolute top-0 left-0 w-16 h-16 sm:w-24 sm:h-24 border-t-2 border-l-2 border-ink-200/25 pointer-events-none rounded-tl-3xl" />
+        <div className="no-print absolute bottom-0 right-0 w-16 h-16 sm:w-24 sm:h-24 border-b-2 border-r-2 border-ink-200/25 pointer-events-none rounded-br-3xl" />
 
         {/* Invoice Layout */}
         <div className="space-y-6 sm:space-y-8 relative z-10">
@@ -298,7 +298,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
                     <td className="py-3 px-2 text-center font-mono">{index + 1}</td>
                     <td className="py-3 px-3 font-semibold text-ink-900 print-text-dark flex items-center gap-1.5">
                       {item.description}
-                      <span className="text-[9px] bg-gold-100/50 border border-gold-600/10 text-gold-600 px-1.5 py-0.5 rounded font-mono font-bold tracking-wide uppercase print-only paid-stamp-print">
+                      <span className="text-[9px] bg-ink-100 border border-ink-100/40 text-ink-700 px-1.5 py-0.5 rounded font-mono font-bold tracking-wide uppercase print-only paid-stamp-print">
                         {item.category}
                       </span>
                     </td>
@@ -323,13 +323,13 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
                     <span className="text-[8px] font-mono text-ink-300 font-bold uppercase tracking-wider block">Item #{index + 1}</span>
                     <span className="text-xs font-bold text-ink-900 block break-words leading-relaxed">{item.description}</span>
                   </div>
-                  <span className="text-[8px] bg-gold-100/50 border border-gold-600/10 text-gold-600 px-1.5 py-0.5 rounded font-bold uppercase tracking-wide flex-shrink-0">
+                  <span className="text-[8px] bg-ink-100 border border-ink-100/40 text-ink-700 px-1.5 py-0.5 rounded font-bold uppercase tracking-wide flex-shrink-0">
                     {item.category}
                   </span>
                 </div>
                 <div className="flex justify-between items-center text-[10px] text-ink-500 border-t border-ink-100/40 pt-2 font-mono">
                   <span>{item.quantity} Qty &times; {formatCurrency(item.rate)}</span>
-                  <span className="font-bold text-ink-950 text-xs tabular-nums">{formatCurrency(item.amount)}</span>
+                  <span className="font-bold text-ink-955 text-xs tabular-nums">{formatCurrency(item.amount)}</span>
                 </div>
               </div>
             ))}
@@ -381,13 +381,13 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
               
               <div className="flex justify-between font-bold text-sm text-ink-900 print-text-dark">
                 <span className="text-ink-900 font-serif print-text-dark">Grand Total</span>
-                <span className="text-ink-900 print-text-dark font-serif border-b-2 border-gold-600 pb-0.5 font-mono tabular-nums">{formatCurrency(invoice.totalAmount)}</span>
+                <span className="text-ink-900 print-text-dark font-serif border-b-2 border-ink-900 pb-0.5 font-mono tabular-nums">{formatCurrency(invoice.totalAmount)}</span>
               </div>
 
-              {/* Rotated PAID IN FULL rubber stamp SVG (Absolute on desktop/print, flow-relative on mobile viewports) */}
+              {/* Rotated PAID IN FULL rubber stamp SVG (Auditing Red ink color) */}
               <div className="mt-4 md:mt-0 flex justify-center md:absolute md:right-0 md:bottom-12 md:rotate-[-12deg] pointer-events-none select-none opacity-85">
-                <div className="border-4 border-double border-gold-600 text-gold-600 rounded-xl px-4 py-2 flex flex-col items-center justify-center font-bold tracking-widest uppercase paid-stamp-print">
-                  <span className="text-xs tracking-widest flex items-center gap-1 font-serif">PAID IN FULL <Check className="w-3.5 h-3.5 text-gold-600 stroke-[3px]" /></span>
+                <div className="border-4 border-double border-rose-700 text-rose-700 rounded-xl px-4 py-2 flex flex-col items-center justify-center font-bold tracking-widest uppercase paid-stamp-print">
+                  <span className="text-xs tracking-widest flex items-center gap-1 font-serif">PAID IN FULL <Check className="w-3.5 h-3.5 text-rose-700 stroke-[3px]" /></span>
                   <span className="text-[8px] font-mono mt-0.5 tracking-wider">Settled &bull; {invoice.paymentMode}</span>
                 </div>
               </div>

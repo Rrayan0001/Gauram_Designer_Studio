@@ -68,7 +68,7 @@ export default function Sidebar() {
       {/* ── MOBILE HEADER (Hidden on Desktop) ── */}
       <header className="no-print md:hidden bg-white border-b border-ink-100 px-4 pt-safe pb-3 flex items-center justify-between sticky top-0 z-40 select-none">
         <Link href="/" className="flex items-center gap-2">
-          <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-ink-100 ring-1 ring-gold-600/20 p-0.5">
+          <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-ink-100 ring-1 ring-ink-100 p-0.5">
             <Image src="/logo.png" alt="Gauram Logo" fill className="object-contain" />
           </div>
           <div>
@@ -83,10 +83,10 @@ export default function Sidebar() {
         <div className="flex items-center gap-1.5">
           <button
             onClick={() => setCommandOpen(true)}
-            className="p-2.5 rounded-xl text-ink-500 hover:bg-ink-100/30 transition-colors flex items-center justify-center min-w-[44px] min-h-[44px]"
+            className="p-2.5 rounded-xl text-ink-550 hover:bg-ink-100/30 transition-colors flex items-center justify-center min-w-[44px] min-h-[44px]"
             aria-label="Search command palette"
           >
-            <Search className="w-5 h-5 text-gold-600" />
+            <Search className="w-5 h-5 text-ink-700" />
           </button>
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
@@ -112,7 +112,7 @@ export default function Sidebar() {
             {/* Header / Brand in Drawer */}
             <div className="flex items-center justify-between pb-4 border-b border-ink-100 mb-4">
               <div className="flex items-center gap-2">
-                <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-ink-100 ring-1 ring-gold-600/20 p-0.5">
+                <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-ink-100 ring-1 ring-ink-100 p-0.5">
                   <Image src="/logo.png" alt="Gauram Logo" fill className="object-contain" />
                 </div>
                 <div>
@@ -141,13 +141,13 @@ export default function Sidebar() {
                     key={name}
                     href={href}
                     onClick={handleLinkClick}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors ${
                       active
-                        ? 'bg-gold-100 text-gold-600 font-bold border-l-3 border-gold-600'
-                        : 'text-ink-700 hover:bg-ink-100/30 hover:text-ink-900'
+                        ? 'bg-ink-900 text-white shadow-2xs'
+                        : 'text-ink-700 hover:bg-ink-100/40 hover:text-ink-900'
                     }`}
                   >
-                    <Icon className={`w-4 h-4 ${active ? 'text-gold-600' : 'text-ink-300'}`} />
+                    <Icon className={`w-4 h-4 ${active ? 'text-white' : 'text-ink-400'}`} />
                     <span>{name}</span>
                   </Link>
                 )
@@ -175,7 +175,7 @@ export default function Sidebar() {
             collapsed ? 'justify-center' : ''
           }`}
         >
-          <div className="relative flex-shrink-0 w-9 h-9 rounded-lg overflow-hidden border border-ink-100 ring-1 ring-gold-600/30 p-0.5 bg-paper">
+          <div className="relative flex-shrink-0 w-9 h-9 rounded-lg overflow-hidden border border-ink-100 ring-1 ring-ink-100 p-0.5 bg-paper">
             <Image src="/logo.png" alt="Gauram Logo" fill className="object-contain" />
           </div>
           {!collapsed && (
@@ -201,11 +201,11 @@ export default function Sidebar() {
                 title={collapsed ? name : undefined}
                 className={`flex items-center gap-3 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-150 ${
                   active
-                    ? 'border-l-3 border-gold-600 bg-gold-100/30 text-ink-900 pl-2'
-                    : 'text-ink-500 hover:bg-ink-100/10 hover:text-ink-900 pl-3'
+                    ? 'bg-ink-900 text-white pl-3.5 shadow-2xs'
+                    : 'text-ink-500 hover:bg-ink-100/50 hover:text-ink-900 pl-3.5'
                 } ${collapsed ? 'justify-center pl-0!' : ''}`}
               >
-                <Icon className={`w-4 h-4 flex-shrink-0 ${active ? 'text-gold-600' : 'text-ink-300'}`} />
+                <Icon className={`w-4 h-4 flex-shrink-0 ${active ? 'text-white' : 'text-ink-400'}`} />
                 {!collapsed && <span className="truncate">{name}</span>}
               </Link>
             )
@@ -217,7 +217,7 @@ export default function Sidebar() {
           {!collapsed && (
             <div
               onClick={() => setCommandOpen(true)}
-              className="px-3 py-2.5 mx-2 my-2 bg-ink-100/30 border border-ink-100 rounded-lg hover:bg-gold-100/20 cursor-pointer flex items-center justify-between text-[10px] text-ink-500 font-medium transition-colors"
+              className="px-3 py-2.5 mx-2 my-2 bg-ink-100/30 border border-ink-100 rounded-lg hover:bg-ink-100/60 cursor-pointer flex items-center justify-between text-[10px] text-ink-500 font-medium transition-colors"
               title="Click to search action shortcuts"
             >
               <span className="flex items-center gap-1.5">

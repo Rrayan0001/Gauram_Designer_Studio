@@ -104,7 +104,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
 
         {/* Profile Card (Bottom on Mobile, left on desktop) */}
         <div className="md:order-1 flex-1 bg-white border border-ink-100 rounded-2xl p-5 flex items-center gap-4 shadow-[0_1px_3px_rgba(26,24,20,0.02),0_8px_24px_-12px_rgba(26,24,20,0.05)]">
-          <div className="w-14 h-14 rounded-full bg-gold-100/40 border border-gold-600/10 flex items-center justify-center text-gold-600 font-serif text-lg font-bold flex-shrink-0 select-none">
+          <div className="w-14 h-14 rounded-full bg-ink-100 border border-ink-100 flex items-center justify-center text-ink-700 font-serif text-lg font-bold flex-shrink-0 select-none">
             {getInitials(customer.name)}
           </div>
           <div className="min-w-0">
@@ -149,7 +149,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                       {new Date(inv.invoiceDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                     </td>
                     <td className="px-4 py-3.5 text-center">
-                      <span className="bg-gold-100/50 border border-gold-600/10 text-gold-600 font-semibold px-2 py-0.5 rounded text-[9px] uppercase tracking-wide">
+                      <span className="bg-ink-100 border border-ink-100/30 text-ink-700 font-semibold px-2 py-0.5 rounded text-[9px] uppercase tracking-wide">
                         {inv.paymentMode}
                       </span>
                     </td>
@@ -157,7 +157,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                     <td className="px-4 py-3.5 text-center">
                       <Link href={`/invoices/${inv.id}`}
                         className="inline-flex p-1.5 rounded-lg border border-ink-100 text-ink-400 hover:text-ink-900 hover:bg-ink-100/40 transition-colors">
-                        <Eye className="w-4 h-4" />
+                        <Eye className="w-4 h-4 text-ink-700" />
                       </Link>
                     </td>
                   </tr>
@@ -181,7 +181,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                     <span className="font-mono text-[10px] font-bold text-ink-900">
                       {inv.orderId || 'Draft'}
                     </span>
-                    <span className="text-[8px] bg-gold-100/50 border border-gold-600/10 text-gold-600 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">
+                    <span className="text-[8px] bg-ink-100 border border-ink-100/35 text-ink-700 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">
                       {inv.paymentMode}
                     </span>
                   </div>
@@ -195,7 +195,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                     <span className="block text-[8px] text-ink-300 uppercase tracking-wider font-bold">Bill total</span>
                     <span className="font-bold text-ink-950 font-mono text-xs tabular-nums">{fmt(inv.totalAmount)}</span>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-ink-300 group-hover:text-gold-600 transition-colors" />
+                  <ChevronRight className="w-4 h-4 text-ink-300 group-hover:text-ink-800 transition-colors" />
                 </div>
               </Link>
             ))}
@@ -206,7 +206,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
         {/* Stylist Notes Section */}
         <div className="bg-white border border-ink-100 rounded-2xl p-5 shadow-[0_1px_3px_rgba(26,24,20,0.02),0_8px_24px_-12px_rgba(26,24,20,0.05)] h-fit flex flex-col space-y-4">
           <div className="flex items-center gap-2 border-b border-ink-100 pb-2.5">
-            <FileText className="w-4.5 h-4.5 text-gold-600" />
+            <FileText className="w-4.5 h-4.5 text-ink-700" />
             <div>
               <h3 className="text-xs font-bold text-ink-900 uppercase tracking-wider">Stylist Custom Notes</h3>
               <p className="text-[9px] text-ink-500 font-medium">Measurements, bridal fitting, custom requests</p>
@@ -218,7 +218,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
             placeholder="Write customer measurements, stitching sizes (e.g. bust, waist, length), or bespoke lehenga request parameters here..."
             value={notes}
             onChange={e => setNotes(e.target.value)}
-            className="w-full text-base md:text-xs font-medium border border-ink-100 rounded-xl p-3 bg-paper/20 focus:outline-none focus:border-gold-600 focus:bg-white transition-all resize-none text-ink-900 input-mobile-lg"
+            className="w-full text-base md:text-xs font-medium border border-ink-100 rounded-xl p-3 bg-paper/20 focus:outline-none focus:border-ink-500 focus:bg-white transition-all resize-none text-ink-900 input-mobile-lg"
           />
 
           <button
@@ -237,7 +237,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
               </>
             ) : (
               <>
-                <Sparkles className="w-4 h-4 text-gold-500 fill-gold-500" /> {savingNotes ? 'Saving...' : 'Save Stylist Notes'}
+                <Sparkles className="w-4 h-4 text-white" /> {savingNotes ? 'Saving...' : 'Save Stylist Notes'}
               </>
             )}
           </button>

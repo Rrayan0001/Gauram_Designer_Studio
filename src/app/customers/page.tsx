@@ -87,7 +87,7 @@ export default function CustomersPage() {
           <div className="fixed inset-x-0 bottom-0 md:top-1/2 md:left-1/2 md:bottom-auto md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-md bg-white border border-ink-100 rounded-t-2xl md:rounded-2xl shadow-xl z-50 p-6 pb-safe animate-in slide-in-from-bottom md:zoom-in-95 duration-200 select-none">
             <div className="flex justify-between items-center pb-3 border-b border-ink-100 mb-4">
               <div className="flex items-center gap-2">
-                <Users className="w-5 h-5 text-gold-600" />
+                <Users className="w-5 h-5 text-ink-700" />
                 <h3 className="font-serif text-sm font-bold uppercase tracking-wider text-ink-900">Register New Client</h3>
               </div>
               <button
@@ -111,7 +111,7 @@ export default function CustomersPage() {
                   placeholder="e.g. 9900469746"
                   value={newPhone}
                   onChange={e => setNewPhone(e.target.value)}
-                  className="w-full bg-white border border-ink-100 rounded-xl px-3.5 py-2.5 text-base md:text-xs text-ink-900 focus:outline-none focus:border-gold-600 input-mobile-lg font-semibold"
+                  className="w-full bg-white border border-ink-100 rounded-xl px-3.5 py-2.5 text-base md:text-xs text-ink-900 focus:outline-none focus:border-ink-500 input-mobile-lg font-semibold"
                 />
               </div>
 
@@ -125,7 +125,7 @@ export default function CustomersPage() {
                   placeholder="e.g. Priyal Patel"
                   value={newName}
                   onChange={e => setNewName(e.target.value)}
-                  className="w-full bg-white border border-ink-100 rounded-xl px-3.5 py-2.5 text-base md:text-xs text-ink-900 focus:outline-none focus:border-gold-600 input-mobile-lg font-semibold"
+                  className="w-full bg-white border border-ink-100 rounded-xl px-3.5 py-2.5 text-base md:text-xs text-ink-900 focus:outline-none focus:border-ink-500 input-mobile-lg font-semibold"
                 />
               </div>
 
@@ -138,7 +138,7 @@ export default function CustomersPage() {
                   placeholder="Optional address details"
                   value={newAddress}
                   onChange={e => setNewAddress(e.target.value)}
-                  className="w-full bg-white border border-ink-100 rounded-xl px-3.5 py-2.5 text-base md:text-xs text-ink-900 focus:outline-none focus:border-gold-600 input-mobile-lg font-semibold"
+                  className="w-full bg-white border border-ink-100 rounded-xl px-3.5 py-2.5 text-base md:text-xs text-ink-900 focus:outline-none focus:border-ink-500 input-mobile-lg font-semibold"
                 />
               </div>
 
@@ -147,7 +147,7 @@ export default function CustomersPage() {
                 disabled={saving}
                 className="w-full flex items-center justify-center gap-1.5 bg-ink-900 hover:bg-ink-700 text-white py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all select-none min-h-[44px]"
               >
-                <Plus className="w-4 h-4 text-gold-500" />
+                <Plus className="w-4 h-4 text-white" />
                 {saving ? 'Registering...' : 'Register Client'}
               </button>
             </form>
@@ -169,11 +169,11 @@ export default function CustomersPage() {
             className="flex items-center justify-center p-2.5 rounded-xl border border-ink-100 bg-white hover:bg-ink-100/30 transition-all min-w-[44px] min-h-[44px] shadow-2xs"
             aria-label="Add customer"
           >
-            <Plus className="w-5 h-5 text-gold-600" />
+            <Plus className="w-5 h-5 text-ink-700" />
           </button>
           
-          <div className="hidden sm:flex items-center gap-1.5 text-xs text-ink-500 bg-gold-100/40 border border-gold-600/10 px-3 py-1.5 rounded-xl font-semibold select-none">
-            <Users className="w-4 h-4 text-gold-600" />
+          <div className="hidden sm:flex items-center gap-1.5 text-xs text-ink-500 bg-ink-100/40 border border-ink-100/30 px-3 py-1.5 rounded-xl font-semibold select-none">
+            <Users className="w-4 h-4 text-ink-700" />
             <span>{totalClientsCount} registered</span>
           </div>
         </div>
@@ -182,10 +182,10 @@ export default function CustomersPage() {
       {/* Customer Stat Strip */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 select-none">
         {[
-          { label: 'Total Clients', value: String(totalClientsCount), sub: 'Bespoke customer profiles', icon: <Users className="w-4 h-4 text-gold-600" /> },
-          { label: 'Repeat Customers', value: String(repeatClientsCount), sub: 'Issued more than 1 bill', icon: <Sparkles className="w-4 h-4 text-gold-600" /> },
-          { label: 'Top Spender LTV', value: fmt(topSpenderAmt), sub: 'Highest boutique order total', icon: <Trophy className="w-4 h-4 text-gold-600" /> },
-          { label: 'Average Client LTV', value: fmt(avgLtvVal), sub: 'Average store sales per client', icon: <Coins className="w-4 h-4 text-gold-600" /> },
+          { label: 'Total Clients', value: String(totalClientsCount), sub: 'Bespoke customer profiles', icon: <Users className="w-4 h-4 text-ink-700" /> },
+          { label: 'Repeat Customers', value: String(repeatClientsCount), sub: 'Issued more than 1 bill', icon: <Sparkles className="w-4 h-4 text-ink-700" /> },
+          { label: 'Top Spender LTV', value: fmt(topSpenderAmt), sub: 'Highest boutique order total', icon: <Trophy className="w-4 h-4 text-ink-700" /> },
+          { label: 'Average Client LTV', value: fmt(avgLtvVal), sub: 'Average store sales per client', icon: <Coins className="w-4 h-4 text-ink-700" /> },
         ].map(({ label, value, sub, icon }) => (
           <div key={label} className="bg-white border border-ink-100 rounded-2xl p-4.5 shadow-[0_1px_3px_rgba(26,24,20,0.02),0_8px_24px_-12px_rgba(26,24,20,0.05)]">
             <div className="flex justify-between items-start">
@@ -207,7 +207,7 @@ export default function CustomersPage() {
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-300" />
             <input type="text" placeholder="Search customer records..." value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="w-full pr-4 py-2.5 text-base md:text-xs border border-ink-100 rounded-xl focus:outline-none focus:border-gold-600 bg-white placeholder-ink-300 text-ink-900 font-medium transition-all input-mobile-lg"
+              className="w-full pr-4 py-2.5 text-base md:text-xs border border-ink-100 rounded-xl focus:outline-none focus:border-ink-500 bg-white placeholder-ink-300 text-ink-900 font-medium transition-all input-mobile-lg"
               style={{ paddingLeft: '2.5rem' }} />
           </div>
         </div>
@@ -246,7 +246,7 @@ export default function CustomersPage() {
               ) : customers.map(c => (
                 <tr key={c.id} className="hover:bg-paper/20 transition-colors">
                   <td className="px-5 py-4 flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-gold-100/40 border border-gold-600/10 flex items-center justify-center text-gold-600 font-serif text-xs font-bold flex-shrink-0 select-none">
+                    <div className="w-9 h-9 rounded-full bg-ink-100 border border-ink-100/40 flex items-center justify-center text-ink-700 font-serif text-xs font-bold flex-shrink-0 select-none">
                       {getInitials(c.name)}
                     </div>
                     <div>
@@ -259,7 +259,7 @@ export default function CustomersPage() {
                   <td className="px-5 py-4 text-center">
                     <Link href={`/customers/${c.id}`}
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-ink-100 hover:border-ink-300 hover:bg-white text-ink-700 hover:text-ink-900 text-[10px] font-bold transition-all shadow-2xs">
-                      <Eye className="w-3.5 h-3.5 text-gold-600" /> View Profile &amp; History
+                      <Eye className="w-3.5 h-3.5 text-ink-700" /> View Profile &amp; History
                     </Link>
                   </td>
                 </tr>
@@ -285,7 +285,7 @@ export default function CustomersPage() {
                 className="flex items-center justify-between p-4 bg-white hover:bg-paper/10 active:bg-gold-100/10 active:scale-[0.99] transition-all select-none group"
               >
                 <div className="flex items-center gap-3 min-w-0 pr-2">
-                  <div className="w-10 h-10 rounded-full bg-gold-100/40 border border-gold-600/10 flex items-center justify-center text-gold-600 font-serif text-xs font-bold flex-shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-ink-100 border border-ink-100/40 flex items-center justify-center text-ink-700 font-serif text-xs font-bold flex-shrink-0">
                     {getInitials(c.name)}
                   </div>
                   <div className="min-w-0">
@@ -303,7 +303,7 @@ export default function CustomersPage() {
                     <span className="block text-[8px] text-ink-300 uppercase tracking-wider font-bold">Total LTV</span>
                     <span className="font-bold text-ink-950 font-mono tabular-nums text-xs">{fmt(c.totalBilled)}</span>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-ink-300 group-hover:text-gold-600 transition-colors" />
+                  <ChevronRight className="w-4 h-4 text-ink-300 group-hover:text-ink-800 transition-colors" />
                 </div>
               </Link>
             ))

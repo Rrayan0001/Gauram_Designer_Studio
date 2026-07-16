@@ -12,7 +12,7 @@ interface InvoiceItemInput {
 }
 interface InvoiceFormProps { initialInvoice?: any }
 
-const inputCls = 'w-full bg-white border border-ink-100 rounded-xl px-3.5 py-2.5 text-base md:text-xs text-ink-900 placeholder-ink-300 focus:outline-none focus:border-gold-600 focus:ring-1 focus:ring-gold-600/20 transition-all font-medium input-mobile-lg'
+const inputCls = 'w-full bg-white border border-ink-100 rounded-xl px-3.5 py-2.5 text-base md:text-xs text-ink-900 placeholder-ink-300 focus:outline-none focus:border-ink-500 focus:ring-1 focus:ring-ink-500/20 transition-all font-medium input-mobile-lg'
 const labelCls = 'text-[10px] md:text-[9px] font-bold text-ink-500 uppercase tracking-wider block mb-1.5'
 
 export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
@@ -172,15 +172,15 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
             <div className="flex justify-between items-center border-b border-ink-100 pb-3">
               <h3 className="text-sm font-bold text-ink-900">Customer Profile Ledger</h3>
               {customerId && (
-                <span className="flex items-center gap-1 text-[9px] font-bold text-gold-600 bg-gold-100/50 border border-gold-600/10 px-2.5 py-1 rounded-full uppercase tracking-wider animate-pulse">
-                  <UserCheck className="w-3 h-3 text-gold-600" /> Returning Client
+                <span className="flex items-center gap-1 text-[9px] font-bold text-ink-700 bg-ink-100 border border-ink-100 px-2.5 py-1 rounded-full uppercase tracking-wider">
+                  <UserCheck className="w-3 h-3 text-ink-700" /> Returning Client
                 </span>
               )}
             </div>
 
             <div className="flex flex-col sm:flex-row gap-5 items-start">
               {/* Initials Avatar */}
-              <div className="w-14 h-14 rounded-full bg-gold-100/40 border border-gold-600/10 flex items-center justify-center text-gold-600 font-serif text-lg font-bold flex-shrink-0 select-none">
+              <div className="w-14 h-14 rounded-full bg-ink-100 border border-ink-100 flex items-center justify-center text-ink-700 font-serif text-lg font-bold flex-shrink-0 select-none">
                 {getInitials(customerName)}
               </div>
 
@@ -209,7 +209,7 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
                             <span className="font-semibold text-ink-900 block">{c.name}</span>
                             <span className="text-ink-300 font-mono">{c.phone}</span>
                           </div>
-                          <Check className="w-3.5 h-3.5 text-gold-600" />
+                          <Check className="w-3.5 h-3.5 text-ink-900" />
                         </button>
                       ))}
                     </div>
@@ -245,7 +245,7 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
                                 <span className="font-bold text-ink-900 block">{c.name}</span>
                                 <span className="text-xs text-ink-500 font-mono">+91 {c.phone}</span>
                               </div>
-                              <Check className="w-4 h-4 text-gold-600" />
+                              <Check className="w-4 h-4 text-ink-900" />
                             </button>
                           ))}
                         </div>
@@ -300,7 +300,7 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
                 onClick={addItem}
                 className="flex items-center justify-center gap-1.5 bg-ink-900 text-white hover:bg-ink-700 text-xs px-3.5 py-2.5 rounded-xl font-bold transition-all shadow-xs active:scale-95 min-w-[44px] min-h-[44px]"
               >
-                <Plus className="w-3.5 h-3.5 text-gold-500" />
+                <Plus className="w-3.5 h-3.5 text-white" />
                 Add Item
               </button>
             </div>
@@ -310,12 +310,12 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
               {items.map((item, index) => (
                 <div
                   key={index}
-                  className="bg-white border border-ink-100 rounded-2xl p-4 md:p-5 space-y-4 hover:border-gold-600/35 hover:shadow-[0_4px_12px_rgba(26,24,20,0.02)] transition-all duration-200 relative group"
+                  className="bg-white border border-ink-100 rounded-2xl p-4 md:p-5 space-y-4 hover:border-ink-300 hover:shadow-[0_4px_12px_rgba(26,24,20,0.02)] transition-all duration-200 relative group"
                 >
                   {/* Top card bar: index indicator + actions */}
                   <div className="flex justify-between items-center border-b border-ink-100 pb-2.5">
-                    <span className="text-[10px] font-bold text-gold-600 uppercase tracking-widest bg-gold-100/40 border border-gold-600/10 rounded-lg px-2.5 py-1 flex items-center gap-1 select-none">
-                      <Sparkle className="w-3 h-3 text-gold-600 fill-gold-600" /> Item #{index + 1}
+                    <span className="text-[10px] font-bold text-ink-700 uppercase tracking-widest bg-ink-100 border border-ink-100/30 rounded-lg px-2.5 py-1 flex items-center gap-1 select-none">
+                      <Sparkle className="w-3 h-3 text-ink-500" /> Item #{index + 1}
                     </span>
                     {items.length > 1 && (
                       <button
@@ -354,14 +354,14 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
                         placeholder="1"
                         value={item.quantity}
                         onChange={e => handleItemChange(index, 'quantity', parseInt(e.target.value) || 0)}
-                        className="w-full bg-white border border-ink-100 rounded-xl px-3.5 py-2.5 text-base md:text-xs text-ink-900 focus:outline-none focus:border-gold-600 focus:ring-1 focus:ring-gold-600/20 text-center transition-all font-semibold input-mobile-lg"
+                        className="w-full bg-white border border-ink-100 rounded-xl px-3.5 py-2.5 text-base md:text-xs text-ink-900 focus:outline-none focus:border-ink-550 focus:ring-1 focus:ring-ink-550/20 text-center transition-all font-semibold input-mobile-lg"
                       />
                     </div>
 
                     {/* Rate (Right) */}
                     <div className="md:col-span-4 space-y-1">
                       <label className={labelCls}>Rate (₹)</label>
-                      <div className="relative rounded-xl border border-ink-100 bg-white focus-within:border-gold-600 focus-within:ring-1 focus-within:ring-gold-600/20 transition-all">
+                      <div className="relative rounded-xl border border-ink-100 bg-white focus-within:border-ink-550 focus-within:ring-1 focus-within:ring-ink-550/20 transition-all">
                         <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-ink-300 text-xs select-none">
                           ₹
                         </span>
@@ -397,9 +397,9 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
             <button
               type="button"
               onClick={addItem}
-              className="w-full flex items-center justify-center gap-2 border-2 border-dashed border-ink-100 hover:border-gold-600/50 text-ink-300 hover:text-ink-900 bg-white/50 hover:bg-white py-4 rounded-2xl text-xs font-bold transition-all select-none min-h-[44px]"
+              className="w-full flex items-center justify-center gap-2 border-2 border-dashed border-ink-100 hover:border-ink-300 text-ink-300 hover:text-ink-900 bg-white/50 hover:bg-white py-4 rounded-2xl text-xs font-bold transition-all select-none min-h-[44px]"
             >
-              <Plus className="w-4 h-4 text-gold-600" />
+              <Plus className="w-4 h-4 text-ink-700" />
               Add another boutique garment / stitching service
             </button>
           </div>
@@ -449,7 +449,7 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
               <div className="border-t border-ink-300 pt-3 flex justify-between items-center text-ink-900">
                 <span className="font-serif text-sm font-bold">Grand Total</span>
                 <div className="text-right">
-                  <span className="font-serif text-lg font-bold border-b-2 border-gold-600 pb-0.5 font-mono">
+                  <span className="font-serif text-lg font-bold border-b-2 border-ink-900 pb-0.5 font-mono">
                     ₹{totalAmount.toFixed(2)}
                   </span>
                 </div>
@@ -488,7 +488,7 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
                       onClick={() => setPaymentMode(item.mode)}
                       className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl border text-[10px] font-bold tracking-wide transition-all select-none min-h-[44px] justify-center ${
                         active
-                          ? 'bg-gold-600 border-gold-600 text-white shadow-xs'
+                          ? 'bg-ink-900 border-ink-900 text-white shadow-xs'
                           : 'bg-white border-ink-100 text-ink-500 hover:bg-ink-100/20 hover:text-ink-900'
                       }`}
                     >
@@ -508,7 +508,7 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
                 onClick={handleSubmit}
                 className="w-full flex items-center justify-center gap-2 bg-ink-900 hover:bg-ink-700 text-white py-3.5 rounded-xl text-xs font-bold tracking-wider uppercase transition-colors disabled:opacity-50 active:scale-95 shadow-md min-h-[44px]"
               >
-                <Sparkles className="w-4 h-4 text-gold-500 fill-gold-500" />
+                <Sparkles className="w-4 h-4 text-white" />
                 {submitting ? 'Generating...' : 'Generate & Print Receipt'}
               </button>
             </div>
@@ -552,7 +552,7 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
                       onClick={() => setPaymentMode(item.mode)}
                       className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl border text-[10px] font-bold tracking-wide transition-all min-h-[44px] justify-center ${
                         active
-                          ? 'bg-gold-600 border-gold-600 text-white shadow-xs'
+                          ? 'bg-ink-900 border-ink-900 text-white shadow-xs'
                           : 'bg-white border-ink-100 text-ink-500'
                       }`}
                     >
@@ -582,7 +582,7 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
           onClick={handleSubmit}
           className="flex-1 max-w-[200px] flex items-center justify-center gap-1.5 bg-ink-900 hover:bg-ink-700 text-white py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors disabled:opacity-50 active:scale-95 shadow-sm min-h-[44px]"
         >
-          <Sparkles className="w-4 h-4 text-gold-500 fill-gold-500" />
+          <Sparkles className="w-4 h-4 text-white" />
           {submitting ? 'Billing...' : 'Generate Bill'}
         </button>
       </div>
