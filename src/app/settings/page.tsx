@@ -323,17 +323,17 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Submit Actions */}
-        <div className="flex justify-end gap-4 items-center pt-2">
+        {/* Submit Actions (Sticky bottom bar on mobile) */}
+        <div className="sticky bottom-0 bg-white/90 backdrop-blur-xs border-t border-ink-100 p-4 -mx-4 md:-mx-0 md:relative md:bg-transparent md:border-t-0 md:p-0 md:my-0 md:pt-2 z-20 flex flex-col md:flex-row justify-end gap-3 items-center select-none">
           {success && (
-            <div className="flex items-center gap-1.5 text-xs text-emerald-600 bg-emerald-50 border border-emerald-200 px-4 py-2.5 rounded-xl font-bold animate-pulse">
+            <div className="w-full md:w-auto flex items-center justify-center gap-1.5 text-xs text-emerald-600 bg-emerald-50 border border-emerald-200 px-4 py-2.5 rounded-xl font-bold animate-pulse">
               <Check className="w-4 h-4 text-emerald-600" /> Settings updated successfully!
             </div>
           )}
           <button
             type="submit"
             disabled={saving}
-            className="flex items-center gap-2 bg-ink-900 hover:bg-ink-700 text-white px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-50 select-none cursor-pointer active:scale-95 shadow-md"
+            className="w-full md:w-auto flex items-center justify-center gap-2 bg-ink-900 hover:bg-ink-700 text-white px-6 py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-50 select-none cursor-pointer active:scale-95 shadow-md min-h-[44px]"
           >
             <Save className="w-4 h-4 text-gold-500" />
             {saving ? 'Saving...' : 'Save Settings'}

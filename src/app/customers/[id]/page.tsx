@@ -2,7 +2,7 @@
 
 import { useState, useEffect, use } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Eye, User, FileText, Sparkles, Check } from 'lucide-react'
+import { ArrowLeft, Eye, User, FileText, Sparkles, Check, ChevronRight } from 'lucide-react'
 import { Card } from '@/components/ui/Kit'
 
 interface InvoiceItem { id: string; description: string; category: string; amount: number }
@@ -72,7 +72,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
   if (error || !customer) return (
     <div className="max-w-md mx-auto mt-12 bg-white border border-ink-100 p-6 rounded-2xl text-center space-y-4">
       <p className="text-red-500 font-semibold">{error || 'Customer not found'}</p>
-      <Link href="/customers" className="inline-flex items-center gap-1 text-sm text-ink-600 hover:text-ink-900">
+      <Link href="/customers" className="inline-flex items-center gap-1 text-sm text-ink-600 hover:text-ink-900 font-bold">
         <ArrowLeft className="w-4 h-4" /> Back to Customers
       </Link>
     </div>
@@ -82,9 +82,9 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
     <div className="space-y-6 animate-in fade-in duration-300">
       
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <Link href="/customers" className="p-2 rounded-xl border border-ink-100 text-ink-500 hover:bg-ink-100/30 transition-colors">
-          <ArrowLeft className="w-4 h-4" />
+      <div className="flex items-center gap-3 select-none">
+        <Link href="/customers" className="p-2.5 rounded-xl border border-ink-100 text-ink-500 hover:bg-ink-100/30 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center">
+          <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
           <h1 className="font-serif text-xl font-bold text-ink-900">Client Ledger Profile</h1>
@@ -92,10 +92,18 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
         </div>
       </div>
 
-      {/* Stats row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Profile details card */}
-        <div className="md:col-span-2 bg-white border border-ink-100 rounded-2xl p-5 flex items-center gap-4 shadow-[0_1px_3px_rgba(26,24,20,0.02),0_8px_24px_-12px_rgba(26,24,20,0.05)]">
+      {/* Stats and Profile details: Stack total billed card on top on Mobile */}
+      <div className="flex flex-col md:flex-row gap-4">
+        
+        {/* Total Billed LTV Card (Top on Mobile, right on desktop) */}
+        <div className="md:order-2 md:w-1/3 bg-white border border-ink-100 rounded-2xl p-5 space-y-1 shadow-[0_1px_3px_rgba(26,24,20,0.02),0_8px_24px_-12px_rgba(26,24,20,0.05)] select-none">
+          <p className="text-[10px] text-ink-500 uppercase tracking-wider font-bold">Total Sales (Settled)</p>
+          <p className="text-xl md:text-2xl font-bold text-ink-900 font-mono tracking-tight">{fmt(customer.totalBilled)}</p>
+          <p className="text-[10px] text-ink-300 font-medium">{customer.invoices.length} receipt{customer.invoices.length !== 1 ? 's' : ''} issued</p>
+        </div>
+
+        {/* Profile Card (Bottom on Mobile, left on desktop) */}
+        <div className="md:order-1 flex-1 bg-white border border-ink-100 rounded-2xl p-5 flex items-center gap-4 shadow-[0_1px_3px_rgba(26,24,20,0.02),0_8px_24px_-12px_rgba(26,24,20,0.05)]">
           <div className="w-14 h-14 rounded-full bg-gold-100/40 border border-gold-600/10 flex items-center justify-center text-gold-600 font-serif text-lg font-bold flex-shrink-0 select-none">
             {getInitials(customer.name)}
           </div>
@@ -105,13 +113,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
             <p className="text-[11px] text-ink-300 mt-1.5 truncate font-medium">{customer.address || 'No residence address recorded'}</p>
           </div>
         </div>
-        
-        {/* Total Billed card */}
-        <div className="bg-white border border-ink-100 rounded-2xl p-5 space-y-1 shadow-[0_1px_3px_rgba(26,24,20,0.02),0_8px_24px_-12px_rgba(26,24,20,0.05)]">
-          <p className="text-[10px] text-ink-500 uppercase tracking-wider font-bold">Total Sales (Settled)</p>
-          <p className="text-xl font-bold text-ink-900 font-mono tracking-tight">{fmt(customer.totalBilled)}</p>
-          <p className="text-[10px] text-ink-300 font-medium">{customer.invoices.length} receipt{customer.invoices.length !== 1 ? 's' : ''} issued</p>
-        </div>
+
       </div>
 
       {/* Two-Column Grid: Left (Invoice history), Right (Stylist custom notes) */}
@@ -123,7 +125,8 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
             <h3 className="text-xs font-bold text-ink-900 uppercase tracking-wider">Billing &amp; Order History</h3>
           </div>
           
-          <div className="overflow-x-auto">
+          {/* Desktop Table (Hidden on Mobile) */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
                 <tr className="border-b border-ink-100 bg-paper/50 text-left">
@@ -136,7 +139,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
               </thead>
               <tbody className="divide-y divide-ink-100">
                 {customer.invoices.length === 0 ? (
-                  <tr><td colSpan={5} className="text-center py-10 text-ink-300">No orders yet.</td></tr>
+                  <tr><td colSpan={5} className="text-center py-10 text-ink-300 font-semibold">No orders yet.</td></tr>
                 ) : customer.invoices.map(inv => (
                   <tr key={inv.id} className="hover:bg-paper/20 transition-colors">
                     <td className="px-4 py-3.5 font-mono font-bold text-ink-900">
@@ -162,6 +165,42 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
               </tbody>
             </table>
           </div>
+
+          {/* Mobile Orders List cards (Hidden on Desktop) */}
+          <div className="md:hidden divide-y divide-ink-100 scroll-y">
+            {customer.invoices.length === 0 ? (
+              <div className="text-center py-10 text-ink-300 text-xs font-semibold">No orders yet.</div>
+            ) : customer.invoices.map(inv => (
+              <Link
+                key={inv.id}
+                href={`/invoices/${inv.id}`}
+                className="flex items-center justify-between p-4 bg-white active:bg-gold-100/10 active:scale-[0.99] transition-all select-none group"
+              >
+                <div className="space-y-1.5 min-w-0 pr-2">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-[10px] font-bold text-ink-900">
+                      {inv.orderId || 'Draft'}
+                    </span>
+                    <span className="text-[8px] bg-gold-100/50 border border-gold-600/10 text-gold-600 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">
+                      {inv.paymentMode}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-ink-500 font-mono font-medium">
+                    {new Date(inv.invoiceDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <div className="text-right">
+                    <span className="block text-[8px] text-ink-300 uppercase tracking-wider font-bold">Bill total</span>
+                    <span className="font-bold text-ink-950 font-mono text-xs tabular-nums">{fmt(inv.totalAmount)}</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-ink-300 group-hover:text-gold-600 transition-colors" />
+                </div>
+              </Link>
+            ))}
+          </div>
+
         </div>
 
         {/* Stylist Notes Section */}
@@ -179,14 +218,14 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
             placeholder="Write customer measurements, stitching sizes (e.g. bust, waist, length), or bespoke lehenga request parameters here..."
             value={notes}
             onChange={e => setNotes(e.target.value)}
-            className="w-full text-xs font-medium border border-ink-100 rounded-xl p-3 bg-paper/20 focus:outline-none focus:border-gold-600 focus:bg-white transition-all resize-none text-ink-900"
+            className="w-full text-base md:text-xs font-medium border border-ink-100 rounded-xl p-3 bg-paper/20 focus:outline-none focus:border-gold-600 focus:bg-white transition-all resize-none text-ink-900 input-mobile-lg"
           />
 
           <button
             type="button"
             disabled={savingNotes}
             onClick={handleSaveNotes}
-            className={`w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-2xs select-none active:scale-[0.98] ${
+            className={`w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-2xs select-none active:scale-[0.98] min-h-[44px] ${
               saveSuccess
                 ? 'bg-emerald-600 text-white'
                 : 'bg-ink-900 hover:bg-ink-700 text-white'

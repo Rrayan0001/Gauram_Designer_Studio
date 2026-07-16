@@ -14,7 +14,8 @@ import {
   ChevronRight,
   Menu,
   X,
-  Keyboard
+  Keyboard,
+  Search
 } from 'lucide-react'
 import CommandPalette from './CommandPalette'
 
@@ -65,7 +66,7 @@ export default function Sidebar() {
       <CommandPalette isOpen={commandOpen} onClose={() => setCommandOpen(false)} />
 
       {/* ── MOBILE HEADER (Hidden on Desktop) ── */}
-      <header className="no-print md:hidden bg-white border-b border-ink-100 px-4 py-3 flex items-center justify-between sticky top-0 z-40 select-none">
+      <header className="no-print md:hidden bg-white border-b border-ink-100 px-4 pt-safe pb-3 flex items-center justify-between sticky top-0 z-40 select-none">
         <Link href="/" className="flex items-center gap-2">
           <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-ink-100 ring-1 ring-gold-600/20 p-0.5">
             <Image src="/logo.png" alt="Gauram Logo" fill className="object-contain" />
@@ -79,13 +80,22 @@ export default function Sidebar() {
             </span>
           </div>
         </Link>
-        <button
-          onClick={() => setMobileOpen(!mobileOpen)}
-          className="p-2 -mr-2 rounded-lg text-ink-500 hover:bg-ink-100/30 transition-colors"
-          aria-label="Toggle menu"
-        >
-          {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => setCommandOpen(true)}
+            className="p-2.5 rounded-xl text-ink-500 hover:bg-ink-100/30 transition-colors flex items-center justify-center min-w-[44px] min-h-[44px]"
+            aria-label="Search command palette"
+          >
+            <Search className="w-5 h-5 text-gold-600" />
+          </button>
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className="p-2.5 -mr-2 rounded-xl text-ink-500 hover:bg-ink-100/30 transition-colors flex items-center justify-center min-w-[44px] min-h-[44px]"
+            aria-label="Toggle menu"
+          >
+            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
       </header>
 
       {/* ── MOBILE SLIDE-OUT DRAWER OVERLAY ── */}
@@ -98,7 +108,7 @@ export default function Sidebar() {
           />
 
           {/* Drawer content panel */}
-          <div className="relative flex flex-col w-64 max-w-xs bg-white h-full border-r border-ink-100 p-4 shadow-xl z-10 animate-in slide-in-from-left duration-200">
+          <div className="relative flex flex-col w-64 max-w-xs bg-white h-full border-r border-ink-100 p-4 pt-safe pb-safe shadow-xl z-10 animate-in slide-in-from-left duration-200">
             {/* Header / Brand in Drawer */}
             <div className="flex items-center justify-between pb-4 border-b border-ink-100 mb-4">
               <div className="flex items-center gap-2">

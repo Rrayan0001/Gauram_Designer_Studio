@@ -10,7 +10,8 @@ import {
   Download,
   Calendar,
   Receipt,
-  Scale
+  Scale,
+  ChevronRight
 } from 'lucide-react'
 import Link from 'next/link'
 import { Card, Skeleton } from '@/components/ui/Kit'
@@ -85,7 +86,6 @@ export default function ReportsPage() {
       const startOfQuarter = new Date(now.getFullYear(), currentQuarterMonth, 1)
       filtered = invoices.filter(inv => new Date(inv.invoiceDate) >= startOfQuarter)
     } else if (datePreset === 'fy2026') {
-      // FY 2026: April 1, 2026 to March 31, 2027
       const startOfFY = new Date(2026, 3, 1)
       const endOfFY = new Date(2027, 2, 31, 23, 59, 59)
       filtered = invoices.filter(inv => {
@@ -146,9 +146,20 @@ export default function ReportsPage() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] gap-2 text-ink-300">
-        <span className="w-8 h-8 border-2 border-gold-600 border-t-transparent rounded-full animate-spin" />
-        <span className="text-xs font-semibold">Aggregating boutique sales reports...</span>
+      <div className="space-y-6 max-w-5xl animate-in fade-in duration-300">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-ink-100">
+          <Skeleton className="h-8 w-64" />
+          <Skeleton className="h-10 w-44" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Skeleton className="h-28 w-full" />
+          <Skeleton className="h-28 w-full" />
+          <Skeleton className="h-28 w-full" />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Skeleton className="h-64 w-full" />
+          <Skeleton className="h-64 lg:col-span-2 w-full" />
+        </div>
       </div>
     )
   }
@@ -157,7 +168,7 @@ export default function ReportsPage() {
     <div className="space-y-6 max-w-5xl animate-in fade-in duration-300">
       
       {/* Header & Date Preset Filters */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-ink-100">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pb-4 border-b border-ink-100">
         <div>
           <h2 className="font-serif text-2xl font-bold text-ink-900">
             Studio Revenue Reports
@@ -167,9 +178,9 @@ export default function ReportsPage() {
           </p>
         </div>
 
-        {/* Date presets block */}
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex bg-white border border-ink-100 rounded-xl p-1 select-none">
+        {/* Date presets scrollable strip */}
+        <div className="flex items-center gap-2 w-full lg:w-auto">
+          <div className="flex bg-white border border-ink-100 rounded-xl p-1 select-none overflow-x-auto whitespace-nowrap scrollbar-none flex-nowrap max-w-full">
             {[
               { id: 'all', label: 'All Time' },
               { id: 'month', label: 'This Month' },
@@ -180,7 +191,7 @@ export default function ReportsPage() {
               <button
                 key={item.id}
                 onClick={() => setDatePreset(item.id as any)}
-                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
+                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all flex-shrink-0 ${
                   datePreset === item.id
                     ? 'bg-gold-600 text-white shadow-2xs'
                     : 'text-ink-500 hover:text-ink-900 hover:bg-ink-100/30'
@@ -193,10 +204,10 @@ export default function ReportsPage() {
 
           <button
             onClick={handleExportCSV}
-            className="flex items-center gap-1 bg-ink-900 hover:bg-ink-700 text-white px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-colors shadow-2xs select-none"
+            className="flex items-center justify-center gap-1 bg-ink-900 hover:bg-ink-700 text-white px-4 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-colors shadow-2xs select-none min-h-[44px]"
             title="Download CSV for Excel/GST filing"
           >
-            <Download className="w-3.5 h-3.5 text-gold-500" /> Export CSV
+            <Download className="w-3.5 h-3.5 text-gold-500" /> Export
           </button>
         </div>
       </div>
@@ -204,11 +215,11 @@ export default function ReportsPage() {
       {/* Grid 1: Sales, Invoices and GST filing summary cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 select-none">
         
-        {/* Total Billed (Sales Volume) */}
-        <div className="bg-white border border-ink-100 p-6 rounded-2xl shadow-[0_1px_3px_rgba(26,24,20,0.02),0_8px_24px_-12px_rgba(26,24,20,0.05)] space-y-2 relative group overflow-hidden">
+        {/* Total Billed */}
+        <div className="bg-white border border-ink-100 p-6 rounded-2xl shadow-[0_1px_3px_rgba(26,24,20,0.02),0_8px_24px_-12px_rgba(26,24,20,0.05)] space-y-2 relative overflow-hidden">
           <div className="flex justify-between items-start">
             <span className="text-[10px] text-ink-500 uppercase tracking-widest font-bold block">Total Billed Sales</span>
-            <span className="p-2.5 rounded-xl bg-paper border border-ink-100 text-gold-600">
+            <span className="p-2.5 rounded-xl bg-paper border border-ink-100 text-gold-600 flex-shrink-0">
               <TrendingUp className="w-4 h-4" />
             </span>
           </div>
@@ -222,10 +233,10 @@ export default function ReportsPage() {
         </div>
 
         {/* GST Filing Helper Summary */}
-        <div className="bg-white border border-ink-100 p-6 rounded-2xl shadow-[0_1px_3px_rgba(26,24,20,0.02),0_8px_24px_-12px_rgba(26,24,20,0.05)] space-y-2 relative group overflow-hidden">
+        <div className="bg-white border border-ink-100 p-6 rounded-2xl shadow-[0_1px_3px_rgba(26,24,20,0.02),0_8px_24px_-12px_rgba(26,24,20,0.05)] space-y-2 relative overflow-hidden">
           <div className="flex justify-between items-start">
             <span className="text-[10px] text-ink-500 uppercase tracking-widest font-bold block">GST Tax Collected</span>
-            <span className="p-2.5 rounded-xl bg-gold-100/50 border border-gold-600/10 text-gold-600">
+            <span className="p-2.5 rounded-xl bg-gold-100/50 border border-gold-600/10 text-gold-600 flex-shrink-0">
               <Scale className="w-4 h-4" />
             </span>
           </div>
@@ -239,10 +250,10 @@ export default function ReportsPage() {
         </div>
 
         {/* Total Invoices Issued count card */}
-        <div className="bg-white border border-ink-100 p-6 rounded-2xl shadow-[0_1px_3px_rgba(26,24,20,0.02),0_8px_24px_-12px_rgba(26,24,20,0.05)] space-y-2 relative group overflow-hidden">
+        <div className="bg-white border border-ink-100 p-6 rounded-2xl shadow-[0_1px_3px_rgba(26,24,20,0.02),0_8px_24px_-12px_rgba(26,24,20,0.05)] space-y-2 relative overflow-hidden">
           <div className="flex justify-between items-start">
             <span className="text-[10px] text-ink-500 uppercase tracking-widest font-bold block">Invoices Billed</span>
-            <span className="p-2.5 rounded-xl bg-paper border border-ink-100 text-gold-600">
+            <span className="p-2.5 rounded-xl bg-paper border border-ink-100 text-gold-600 flex-shrink-0">
               <Receipt className="w-4 h-4" />
             </span>
           </div>
@@ -294,15 +305,16 @@ export default function ReportsPage() {
           </div>
         </div>
 
-        {/* Recent Billing Ledger (Takes 2 cols) */}
+        {/* Billing Ledger (Desktop Table / Mobile Card List hybrid) */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white border border-ink-100 p-6 rounded-2xl shadow-[0_1px_3px_rgba(26,24,20,0.02),0_8px_24px_-12px_rgba(26,24,20,0.05)] space-y-4">
+          <div className="bg-white border border-ink-100 p-5 md:p-6 rounded-2xl shadow-[0_1px_3px_rgba(26,24,20,0.02),0_8px_24px_-12px_rgba(26,24,20,0.05)] space-y-4">
             <h3 className="font-serif text-sm font-bold text-ink-900 flex items-center gap-2">
               <History className="w-4 h-4 text-gold-600" />
               Recent Billings Ledger
             </h3>
 
-            <div className="overflow-x-auto">
+            {/* Desktop Table (Hidden on Mobile) */}
+            <div className="hidden lg:block overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="border-b border-ink-100 text-ink-500 font-bold uppercase tracking-wider bg-paper/50">
@@ -351,6 +363,48 @@ export default function ReportsPage() {
                   )}
                 </tbody>
               </table>
+            </div>
+
+            {/* Mobile Stacked Card List (Visible on Mobile) */}
+            <div className="lg:hidden divide-y divide-ink-100 scroll-y">
+              {filteredInvoices.length === 0 ? (
+                <div className="text-center py-10 text-ink-300 font-medium text-xs">No invoices recorded in this range.</div>
+              ) : (
+                filteredInvoices.slice(0, 10).map((log) => (
+                  <Link
+                    key={log.id}
+                    href={`/invoices/${log.id}`}
+                    className="flex items-center justify-between py-4 bg-white active:bg-gold-100/10 active:scale-[0.99] transition-all select-none group"
+                  >
+                    <div className="space-y-1.5 min-w-0 pr-2">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-[10px] font-bold text-ink-900">
+                          {log.orderId || 'Draft'}
+                        </span>
+                        <span className="text-[8px] bg-gold-100/50 border border-gold-600/10 text-gold-600 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">
+                          {log.paymentMode}
+                        </span>
+                      </div>
+                      <h4 className="text-xs font-bold text-ink-900 truncate">{log.customer.name}</h4>
+                      <p className="text-[10px] text-ink-500 font-mono">
+                        {new Date(log.invoiceDate).toLocaleDateString('en-IN', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric'
+                        })}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <div className="text-right">
+                        <span className="block text-[8px] text-ink-300 uppercase tracking-wider font-bold">Total Billed</span>
+                        <span className="font-bold text-ink-950 font-mono text-xs tabular-nums">{fmt(log.totalAmount)}</span>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-ink-300 group-hover:text-gold-600 transition-colors" />
+                    </div>
+                  </Link>
+                ))
+              )}
             </div>
 
           </div>
