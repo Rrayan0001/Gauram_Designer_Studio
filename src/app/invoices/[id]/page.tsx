@@ -637,7 +637,7 @@ Phone: +91 99004 69746`
                 <button
                   type="submit"
                   disabled={submittingPayment}
-                  className="flex-1 bg-gray-900 border border-gray-300 hover:border-gray-300 text-gray-900 hover:text-gray-900 py-2.5 rounded-xl text-sm font-semibold transition-all hover:"
+                  className="flex-1 bg-gray-900 text-white hover:bg-gray-800 py-2.5 rounded-xl text-sm font-semibold transition-colors"
                 >
                   {submittingPayment ? 'Saving...' : 'Record Payment'}
                 </button>

@@ -255,9 +255,9 @@ export default function SettingsPage() {
           <button
             type="submit"
             disabled={saving}
-            className="flex items-center gap-2 bg-gray-900 border border-gray-300 hover:border-gray-300 text-gray-900 hover:text-gray-900 px-6 py-3 rounded-xl text-sm font-semibold transition-all hover: disabled:opacity-50"
+            className="flex items-center gap-2 bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50"
           >
-            <Save className="w-4 h-4 text-gray-900" />
+            <Save className="w-4 h-4 text-white" />
             {saving ? 'Saving...' : 'Save Settings'}
           </button>
         </div>

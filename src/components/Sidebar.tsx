@@ -131,7 +131,7 @@ export default function Sidebar() {
         }`}
       >
         {/* Brand */}
-        <div className={`flex items-center gap-3 px-3 py-4 border-b border-gray-100 ${collapsed ? 'justify-center' : ''}`}>
+        <Link href="/" className={`flex items-center gap-3 px-3 py-4 border-b border-gray-100 hover:bg-gray-50 transition-colors ${collapsed ? 'justify-center' : ''}`}>
           <div className="relative flex-shrink-0 w-9 h-9 rounded-lg overflow-hidden border border-gray-200">
             <Image src="/logo.png" alt="Gauram Logo" fill className="object-contain" />
           </div>
@@ -145,7 +145,7 @@ export default function Sidebar() {
               </p>
             </div>
           )}
-        </div>
+        </Link>
 
         {/* Nav */}
         <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-hidden">
