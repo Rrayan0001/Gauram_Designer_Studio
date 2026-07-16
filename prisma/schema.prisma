@@ -1,0 +1,76 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model BusinessSettings {
+  id               String   @id @default("default")
+  name             String   @default("Gauram Designer Studio")
+  address          String   @default("2nd Floor, RRR Complex, No. 5, Budigere Rd, near Raymond Store, Devanahalli, Bengaluru, Karnataka 562110")
+  phone            String   @default("+91 99004 69746")
+  email            String   @default("gauramfashionacademy@gmail.com")
+  website          String   @default("www.gauramfashionacademy.com")
+  gstin            String   @default("29GYCPP4290P1ZG")
+  termsAndConds    String   @default("1. Advance payment is non-refundable.\n2. Rental deposit terms apply.\n3. Alteration requests are accepted within 7 days of delivery.")
+  invoicePrefix    String   @default("GDS/2026/")
+  nextInvoiceNum   Int      @default(1)
+  logoUrl          String?
+}
+
+model Customer {
+  id        String    @id @default(uuid())
+  name      String
+  phone     String    @unique
+  address   String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  invoices  Invoice[]
+}
+
+model Invoice {
+  id             String        @id @default(uuid())
+  orderId        String?       @unique // e.g., GDS/2026/0001 (generated on finalize)
+  customerId     String
+  customer       Customer      @relation(fields: [customerId], references: [id])
+  invoiceDate    DateTime      @default(now())
+  status         String        @default("draft") // "draft", "pending", "partial", "paid"
+  subtotal       Float
+  cgstAmount     Float
+  sgstAmount     Float
+  totalAmount    Float
+  amountPaid     Float         @default(0.0)
+  pendingAmount  Float
+  paymentMode    String        @default("Cash") // "Cash" | "UPI" | "Card" | "Bank Transfer"
+  termsText      String
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  items          InvoiceItem[]
+  payments       Payment[]
+}
+
+model InvoiceItem {
+  id          String   @id @default(uuid())
+  invoiceId   String
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  description String
+  category    String   // "Men's Wear" | "Women's Wear" | "Kids Wear" | "Rental"
+  hsnSacCode  String
+  quantity    Int      @default(1)
+  rate        Float
+  discount    Float    @default(0) // Discount amount in ₹
+  amount      Float    // Auto-calculated: (rate * quantity - discount)
+}
+
+model Payment {
+  id         String   @id @default(uuid())
+  invoiceId  String
+  invoice    Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  amount     Float
+  mode       String   // "Cash" | "UPI" | "Card" | "Bank Transfer"
+  date       DateTime @default(now())
+  note       String?
+}
