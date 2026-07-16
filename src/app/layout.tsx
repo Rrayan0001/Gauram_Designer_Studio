@@ -17,8 +17,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${cinzel.variable} h-full`}>
-      <body className="h-full flex flex-col md:flex-row antialiased font-sans">
+    <html lang="en" className={`${inter.variable} ${cinzel.variable} h-full`} suppressHydrationWarning>
+      <body className="h-full flex flex-col md:flex-row antialiased font-sans" suppressHydrationWarning>
         <Sidebar />
         <main className="flex-1 overflow-auto bg-paper min-h-screen">
           <div className="p-4 md:p-8 print-container">
