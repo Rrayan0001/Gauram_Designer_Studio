@@ -118,6 +118,13 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
+            <nav className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-ink-400 font-bold mb-1" aria-label="Breadcrumb">
+              <Link href="/" className="hover:text-ink-900 transition-colors">Dashboard</Link>
+              <span className="font-normal text-ink-300">/</span>
+              <Link href="/customers" className="hover:text-ink-900 transition-colors">Clients</Link>
+              <span className="font-normal text-ink-300">/</span>
+              <span className="text-ink-600 font-semibold">{customer.name}</span>
+            </nav>
             <h1 className="font-serif text-xl md:text-2xl font-bold text-ink-900">Client profile</h1>
             <p className="text-sm text-ink-500 mt-0.5 font-medium">Orders & stylist notes</p>
           </div>

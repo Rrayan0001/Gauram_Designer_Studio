@@ -175,7 +175,7 @@ export default function CustomersPage() {
               placeholder="Search customers…"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pr-4 py-2.5 text-base md:text-sm border border-ink-100 rounded-xl focus:outline-none focus:border-gold-600 bg-white placeholder-ink-400 text-ink-900 font-medium input-mobile-lg"
+              className="w-full pr-4 py-2.5 text-base md:text-sm border border-ink-100 rounded-xl focus:outline-none focus:border-ink-500 focus:ring-1 focus:ring-ink-550/20 bg-white placeholder-ink-400 text-ink-900 font-medium input-mobile-lg"
               style={{ paddingLeft: '2.5rem' }}
             />
           </div>
@@ -231,7 +231,7 @@ export default function CustomersPage() {
                     <td className="px-5 py-4 text-center">
                       <Link
                         href={`/customers/${c.id}`}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-ink-100 hover:border-gold-600/40 text-ink-700 text-[11px] font-bold"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-ink-100 hover:border-ink-300 hover:bg-ink-100/30 text-ink-700 text-[11px] font-bold"
                       >
                         <Eye className="w-3.5 h-3.5" /> View
                       </Link>
@@ -263,7 +263,7 @@ export default function CustomersPage() {
               <Link
                 key={c.id}
                 href={`/customers/${c.id}`}
-                className="flex items-center justify-between p-4 bg-white active:bg-gold-100/10 active:scale-[0.99] transition-all group min-h-[64px]"
+                className="flex items-center justify-between p-4 bg-white active:bg-ink-100/40 active:scale-[0.99] transition-all group min-h-[64px]"
               >
                 <div className="flex items-center gap-3 min-w-0 pr-2">
                   <Avatar name={c.name} size="sm" />

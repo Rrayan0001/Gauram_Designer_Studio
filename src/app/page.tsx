@@ -220,7 +220,7 @@ export default function Dashboard() {
         action={
           <Link
             href="/invoices/new"
-            className="flex items-center justify-center gap-2 bg-gold-600 hover:bg-gold-500 text-white px-5 py-3 rounded-xl text-xs font-bold tracking-wide transition-all shadow-xs active:scale-[0.98] w-full sm:w-auto min-h-[44px]"
+            className="flex items-center justify-center gap-2 bg-ink-900 hover:bg-ink-700 text-white px-5 py-3 rounded-xl text-xs font-bold tracking-wide transition-all shadow-xs active:scale-[0.98] w-full sm:w-auto min-h-[44px]"
           >
             <PlusCircle className="w-4 h-4" />
             Create bill
@@ -229,8 +229,8 @@ export default function Dashboard() {
       />
 
       {/* Today pulse */}
-      <div className="flex flex-wrap items-center gap-3 text-sm bg-gold-100/40 border border-gold-600/15 rounded-2xl px-4 py-3">
-        <Calendar className="w-4 h-4 text-gold-600" />
+      <div className="flex flex-wrap items-center gap-3 text-sm bg-ink-100/40 border border-ink-100/20 rounded-2xl px-4 py-3">
+        <Calendar className="w-4 h-4 text-ink-500" />
         <span className="font-semibold text-ink-900">
           Today: <span className="font-mono tabular-nums">{fmtINR(todaySales)}</span>
         </span>
@@ -285,7 +285,7 @@ export default function Dashboard() {
                   placeholder="Search orders or clients…"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pr-4 py-2.5 text-sm border border-ink-100 rounded-xl focus:outline-none focus:border-gold-600 bg-white placeholder-ink-400 text-ink-900 font-medium input-mobile-lg"
+                  className="w-full pr-4 py-2.5 text-sm border border-ink-100 rounded-xl focus:outline-none focus:border-ink-500 focus:ring-1 focus:ring-ink-550/20 bg-white placeholder-ink-400 text-ink-900 font-medium input-mobile-lg"
                   style={{ paddingLeft: '2.5rem' }}
                 />
               </div>
@@ -416,7 +416,7 @@ export default function Dashboard() {
                     <td className="px-5 py-4 text-center">
                       <Link
                         href={`/invoices/${inv.id}`}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-ink-100 hover:border-gold-600/40 hover:bg-gold-100/30 text-ink-700 text-[11px] font-bold transition-all"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-ink-100 hover:border-ink-300 hover:bg-ink-100/30 text-ink-700 text-[11px] font-bold transition-all"
                       >
                         Receipt <ArrowRight className="w-3 h-3" />
                       </Link>
@@ -449,7 +449,7 @@ export default function Dashboard() {
               <Link
                 key={inv.id}
                 href={`/invoices/${inv.id}`}
-                className="flex items-center justify-between p-4 bg-white hover:bg-paper/10 active:bg-gold-100/10 active:scale-[0.99] transition-all select-none group min-h-[64px]"
+                className="flex items-center justify-between p-4 bg-white hover:bg-paper/10 active:bg-ink-100/40 active:scale-[0.99] transition-all select-none group min-h-[64px]"
               >
                 <div className="space-y-1.5 min-w-0 pr-2">
                   <div className="flex items-center gap-2">

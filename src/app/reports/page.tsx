@@ -226,7 +226,7 @@ export default function ReportsPage() {
         <div className="space-y-6">
           <Card className="space-y-4">
             <h3 className="font-serif text-sm font-bold text-ink-900 flex items-center gap-2">
-              <Tag className="w-4 h-4 text-gold-600" />
+              <Tag className="w-4 h-4 text-ink-500" />
               Category share
             </h3>
             <div className="space-y-4 pt-1">
@@ -243,7 +243,7 @@ export default function ReportsPage() {
                       <span>{percentage.toFixed(0)}%</span>
                     </div>
                     <div className="h-2 w-full bg-paper rounded-full overflow-hidden border border-ink-100">
-                      <div className="h-full bg-gold-600 rounded-full transition-all" style={{ width: `${percentage}%` }} />
+                      <div className="h-full bg-ink-900 rounded-full transition-all" style={{ width: `${percentage}%` }} />
                     </div>
                   </div>
                 )
@@ -283,7 +283,7 @@ export default function ReportsPage() {
                 {topCustomers.map((c, i) => (
                   <li key={c.name + i} className="flex justify-between items-center text-sm">
                     <span className="font-semibold text-ink-900 truncate pr-2">
-                      <span className="text-gold-600 font-mono mr-2">{i + 1}.</span>
+                      <span className="text-ink-500 font-mono mr-2">{i + 1}.</span>
                       {c.name}
                     </span>
                     <span className="font-mono font-bold tabular-nums text-ink-900 flex-shrink-0">{fmtINR(c.total)}</span>
@@ -297,7 +297,7 @@ export default function ReportsPage() {
         <div className="lg:col-span-2">
           <Card className="space-y-4 p-5 md:p-6">
             <h3 className="font-serif text-sm font-bold text-ink-900 flex items-center gap-2">
-              <History className="w-4 h-4 text-gold-600" />
+              <History className="w-4 h-4 text-ink-500" />
               Recent billings
             </h3>
 
@@ -350,7 +350,7 @@ export default function ReportsPage() {
                   <Link
                     key={log.id}
                     href={`/invoices/${log.id}`}
-                    className="flex items-center justify-between py-4 active:bg-gold-100/10 transition-all group min-h-[64px]"
+                    className="flex items-center justify-between py-4 active:bg-ink-100/40 transition-all group min-h-[64px]"
                   >
                     <div className="space-y-1.5 min-w-0 pr-2">
                       <div className="flex items-center gap-2">
