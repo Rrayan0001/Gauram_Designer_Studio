@@ -10,7 +10,7 @@ export async function GET(request: Request) {
       where: query
         ? {
             OR: [
-              { name: { contains: query } },
+              { name: { contains: query, mode: 'insensitive' } },
               { phone: { contains: query } },
             ],
           }
@@ -27,12 +27,11 @@ export async function GET(request: Request) {
       orderBy: { name: 'asc' },
     })
 
-    // Map customers to summarize invoice totals (total billed, total paid, total pending)
     const summary = customers.map((c) => {
       const totalBilled = c.invoices.reduce((sum, inv) => sum + inv.totalAmount, 0)
       const totalPaid = c.invoices.reduce((sum, inv) => sum + inv.amountPaid, 0)
       const totalPending = c.invoices.reduce((sum, inv) => sum + inv.pendingAmount, 0)
-      
+
       return {
         id: c.id,
         name: c.name,
@@ -46,9 +45,10 @@ export async function GET(request: Request) {
     })
 
     return NextResponse.json(summary)
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Internal Server Error'
     console.error('Error fetching customers:', error)
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 })
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
 
@@ -61,17 +61,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Name and Phone are required' }, { status: 400 })
     }
 
-    // Check if customer with phone already exists
     const existing = await prisma.customer.findUnique({
       where: { phone },
     })
 
     if (existing) {
-      // Update existing customer address if provided
       const updated = await prisma.customer.update({
         where: { phone },
         data: {
-          name, // update name just in case it differs
+          name,
           address: address || existing.address,
         },
       })
@@ -87,8 +85,9 @@ export async function POST(request: Request) {
     })
 
     return NextResponse.json(customer)
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Internal Server Error'
     console.error('Error creating customer:', error)
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 })
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

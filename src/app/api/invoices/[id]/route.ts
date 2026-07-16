@@ -1,5 +1,29 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { hsnForCategory, roundMoney, statusFromAmounts } from '@/lib/billing'
+
+function mapItems(items: Array<Record<string, unknown>>) {
+  return items.map((item) => {
+    const category = String(item.category || "Women's Wear")
+    const quantity = parseInt(String(item.quantity ?? 1), 10) || 1
+    const rate = parseFloat(String(item.rate ?? 0)) || 0
+    const discount = parseFloat(String(item.discount ?? 0)) || 0
+    const amount =
+      item.amount !== undefined && item.amount !== null
+        ? parseFloat(String(item.amount)) || 0
+        : roundMoney(quantity * rate - discount)
+
+    return {
+      description: String(item.description || ''),
+      category,
+      hsnSacCode: String(item.hsnSacCode || hsnForCategory(category)),
+      quantity,
+      rate,
+      discount,
+      amount,
+    }
+  })
+}
 
 export async function GET(
   request: Request,
@@ -21,9 +45,10 @@ export async function GET(
     }
 
     return NextResponse.json(invoice)
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Internal Server Error'
     console.error('Error fetching invoice:', error)
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 })
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
 
@@ -35,10 +60,9 @@ export async function PUT(
     const { id } = await params
     const body = await request.json()
 
-    // 1. Check if invoice exists
     const existingInvoice = await prisma.invoice.findUnique({
       where: { id },
-      include: { items: true },
+      include: { items: true, payments: true },
     })
 
     if (!existingInvoice) {
@@ -51,8 +75,9 @@ export async function PUT(
       customerPhone,
       customerAddress,
       invoiceDate,
-      isFinalizing, // set to true if updating from draft to finalized
+      isFinalizing,
       subtotal,
+      discountAmount = existingInvoice.discountAmount ?? 0,
       cgstAmount,
       sgstAmount,
       totalAmount,
@@ -61,128 +86,106 @@ export async function PUT(
       items = [],
     } = body
 
-    // 2. Resolve Customer if details changed
-    let resolvedCustomerId = customerId || existingInvoice.customerId
-    if (!customerId && customerName && customerPhone) {
-      const customer = await prisma.customer.upsert({
-        where: { phone: customerPhone },
-        update: {
-          name: customerName,
-          address: customerAddress || undefined,
+    const paid = parseFloat(String(amountPaid)) || 0
+    const total = parseFloat(String(totalAmount)) || 0
+    const discount = roundMoney(parseFloat(String(discountAmount)) || 0)
+    const mappedItems = mapItems(items)
+
+    const updatedInvoice = await prisma.$transaction(async (tx) => {
+      let resolvedCustomerId = customerId || existingInvoice.customerId
+      if (!customerId && customerName && customerPhone) {
+        const customer = await tx.customer.upsert({
+          where: { phone: customerPhone },
+          update: {
+            name: customerName,
+            address: customerAddress || undefined,
+          },
+          create: {
+            name: customerName,
+            phone: customerPhone,
+            address: customerAddress || undefined,
+          },
+        })
+        resolvedCustomerId = customer.id
+      }
+
+      let orderId = existingInvoice.orderId
+      let status = existingInvoice.status
+      let createInitialPayment = false
+
+      if (existingInvoice.status === 'draft') {
+        if (isFinalizing) {
+          const settings = await tx.businessSettings.findUnique({
+            where: { id: 'default' },
+          })
+          if (!settings) {
+            throw new Error('Business settings not found.')
+          }
+
+          const updatedSettings = await tx.businessSettings.update({
+            where: { id: 'default' },
+            data: { nextInvoiceNum: { increment: 1 } },
+          })
+          const seqNum = updatedSettings.nextInvoiceNum - 1
+          orderId = `${settings.invoicePrefix}${String(seqNum).padStart(4, '0')}`
+          status = statusFromAmounts(total, paid)
+          createInitialPayment = paid > 0
+        }
+      } else {
+        // Finalized invoices: recompute status from amounts
+        status = statusFromAmounts(total, paid)
+      }
+
+      const pendingAmount = total - paid
+
+      await tx.invoiceItem.deleteMany({
+        where: { invoiceId: id },
+      })
+
+      if (createInitialPayment) {
+        await tx.payment.create({
+          data: {
+            invoiceId: id,
+            amount: paid,
+            mode: paymentMode,
+            note: 'Initial payment recorded during invoice finalization.',
+            date: invoiceDate ? new Date(invoiceDate) : new Date(),
+          },
+        })
+      }
+
+      return tx.invoice.update({
+        where: { id },
+        data: {
+          orderId,
+          customerId: resolvedCustomerId,
+          invoiceDate: invoiceDate ? new Date(invoiceDate) : existingInvoice.invoiceDate,
+          status,
+          subtotal: parseFloat(String(subtotal)) || 0,
+          discountAmount: discount,
+          cgstAmount: parseFloat(String(cgstAmount)) || 0,
+          sgstAmount: parseFloat(String(sgstAmount)) || 0,
+          totalAmount: total,
+          amountPaid: paid,
+          pendingAmount,
+          paymentMode,
+          items: {
+            create: mappedItems,
+          },
         },
-        create: {
-          name: customerName,
-          phone: customerPhone,
-          address: customerAddress || undefined,
+        include: {
+          customer: true,
+          items: true,
+          payments: true,
         },
       })
-      resolvedCustomerId = customer.id
-    }
-
-    // 3. Finalization Checks & Number Locking
-    let orderId = existingInvoice.orderId
-    let status = existingInvoice.status
-
-    if (existingInvoice.status === 'draft') {
-      if (isFinalizing) {
-        const settings = await prisma.businessSettings.findUnique({
-          where: { id: 'default' },
-        })
-        if (!settings) {
-          return NextResponse.json({ error: 'Business settings not found.' }, { status: 500 })
-        }
-
-        const prefix = settings.invoicePrefix
-        const seqNum = settings.nextInvoiceNum
-        const formattedSeq = String(seqNum).padStart(4, '0')
-        orderId = `${prefix}${formattedSeq}`
-
-        // Recalculate status based on amount paid
-        const pending = totalAmount - amountPaid
-        if (pending <= 0) {
-          status = 'paid'
-        } else if (amountPaid > 0) {
-          status = 'partial'
-        } else {
-          status = 'pending'
-        }
-
-        // Increment sequence in settings
-        await prisma.businessSettings.update({
-          where: { id: 'default' },
-          data: { nextInvoiceNum: seqNum + 1 },
-        })
-
-        // Also, record the initial payment if payment is recorded now
-        if (amountPaid > 0) {
-          await prisma.payment.create({
-            data: {
-              invoiceId: id,
-              amount: amountPaid,
-              mode: paymentMode,
-              note: 'Initial payment recorded during invoice finalization.',
-              date: invoiceDate ? new Date(invoiceDate) : new Date(),
-            }
-          })
-        }
-      }
-    } else {
-      // For finalized invoices, recompute status based on updated amounts
-      const pending = totalAmount - amountPaid
-      if (pending <= 0) {
-        status = 'paid'
-      } else if (amountPaid > 0) {
-        status = 'partial'
-      } else {
-        status = 'pending'
-      }
-    }
-
-    const pendingAmount = totalAmount - amountPaid
-
-    // 4. Update Invoice - Re-create all items for simplicity
-    // delete previous items first
-    await prisma.invoiceItem.deleteMany({
-      where: { invoiceId: id },
-    })
-
-    const updatedInvoice = await prisma.invoice.update({
-      where: { id },
-      data: {
-        orderId,
-        customerId: resolvedCustomerId,
-        invoiceDate: invoiceDate ? new Date(invoiceDate) : existingInvoice.invoiceDate,
-        status,
-        subtotal,
-        cgstAmount,
-        sgstAmount,
-        totalAmount,
-        amountPaid,
-        pendingAmount,
-        paymentMode,
-        items: {
-          create: items.map((item: any) => ({
-            description: item.description,
-            category: item.category,
-            hsnSacCode: item.hsnSacCode,
-            quantity: item.quantity,
-            rate: item.rate,
-            discount: item.discount || 0,
-            amount: item.amount,
-          })),
-        },
-      },
-      include: {
-        customer: true,
-        items: true,
-        payments: true,
-      },
     })
 
     return NextResponse.json(updatedInvoice)
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Internal Server Error'
     console.error('Error updating invoice:', error)
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 })
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
 
@@ -196,8 +199,9 @@ export async function DELETE(
       where: { id },
     })
     return NextResponse.json({ success: true, message: 'Invoice deleted successfully.' })
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Internal Server Error'
     console.error('Error deleting invoice:', error)
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 })
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

@@ -2,24 +2,74 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Trash2, ArrowLeft, Sparkles, Check, Sparkle, UserCheck, Smartphone, Landmark, CreditCard, Coins, X } from 'lucide-react'
+import {
+  Plus,
+  Trash2,
+  ArrowLeft,
+  Sparkles,
+  Check,
+  Sparkle,
+  UserCheck,
+  Smartphone,
+  Landmark,
+  CreditCard,
+  Coins,
+  X,
+} from 'lucide-react'
 import Link from 'next/link'
+import { useToast } from '@/components/ui/Toast'
+import { Avatar, Button, Field } from '@/components/ui/Kit'
+import { computeBillTotals } from '@/lib/gst'
+import { CATEGORIES, CATEGORY_HSN, ITEM_TEMPLATES, type Category, hsnForCategory } from '@/lib/categories'
+import { cn } from '@/lib/cn'
 
-interface Customer { id: string; name: string; phone: string; address?: string }
-interface InvoiceItemInput {
-  description: string; category: string; hsnSacCode: string
-  quantity: number; rate: number; discount: number; gstRate: number; amount: number
+interface Customer {
+  id: string
+  name: string
+  phone: string
+  address?: string
 }
-interface InvoiceFormProps { initialInvoice?: any }
+interface InvoiceItemInput {
+  description: string
+  category: Category
+  hsnSacCode: string
+  quantity: number
+  rate: number
+  discount: number
+  gstRate: number
+  amount: number
+}
+interface InvoiceFormProps {
+  initialInvoice?: {
+    id: string
+    customerId?: string
+    customer?: { name: string; phone: string; address?: string }
+    invoiceDate?: string
+    paymentMode?: string
+    subtotal?: number
+    cgstAmount?: number
+    items?: Array<{
+      description: string
+      category?: string
+      hsnSacCode?: string
+      quantity: number
+      rate: number
+      amount?: number
+    }>
+  }
+}
 
-const inputCls = 'w-full bg-white border border-ink-100 rounded-xl px-3.5 py-2.5 text-base md:text-xs text-ink-900 placeholder-ink-300 focus:outline-none focus:border-ink-500 focus:ring-1 focus:ring-ink-500/20 transition-all font-medium input-mobile-lg'
-const labelCls = 'text-[10px] md:text-[9px] font-bold text-ink-500 uppercase tracking-wider block mb-1.5'
+const DRAFT_KEY = 'gds-bill-draft'
+
+const labelCls = 'text-[11px] font-bold text-ink-500 tracking-wide block mb-1.5'
+const inputCls =
+  'w-full bg-white border border-ink-100 rounded-xl px-3.5 py-2.5 text-base md:text-sm text-ink-900 placeholder-ink-400 focus:outline-none focus:border-gold-600 focus:ring-2 focus:ring-gold-600/15 transition-all font-medium input-mobile-lg'
 
 export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
   const router = useRouter()
+  const toast = useToast()
   const isEdit = !!initialInvoice
 
-  const [settings, setSettings] = useState<any>(null)
   const [customerId, setCustomerId] = useState(initialInvoice?.customerId || '')
   const [customerName, setCustomerName] = useState(initialInvoice?.customer?.name || '')
   const [customerPhone, setCustomerPhone] = useState(initialInvoice?.customer?.phone || '')
@@ -32,88 +82,218 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
       : new Date().toISOString().split('T')[0]
   )
   const [paymentMode, setPaymentMode] = useState(initialInvoice?.paymentMode || 'UPI')
+  const [errors, setErrors] = useState<Record<string, string>>({})
 
-  // Overall discount state
   const [overallDiscount, setOverallDiscount] = useState<number>(() => {
-    if (!initialInvoice) return 0
+    if (!initialInvoice?.cgstAmount || !initialInvoice?.subtotal) return 0
     const taxableVal = initialInvoice.cgstAmount / 0.06
     const diff = initialInvoice.subtotal - taxableVal
     return diff > 0.01 ? Math.round(diff * 100) / 100 : 0
   })
 
-  // Load items.
   const [items, setItems] = useState<InvoiceItemInput[]>(
-    initialInvoice?.items?.map((item: any) => ({
-      description: item.description,
-      category: item.category || "Women's Wear",
-      hsnSacCode: item.hsnSacCode || 'HSN 6204',
-      quantity: item.quantity,
-      rate: item.rate,
-      discount: 0,
-      gstRate: 12,
-      amount: item.quantity * item.rate,
-    })) || [{ description: '', category: "Women's Wear", hsnSacCode: 'HSN 6204', quantity: 1, rate: 0, discount: 0, gstRate: 12, amount: 0 }]
+    initialInvoice?.items?.map((item) => {
+      const cat = (item.category as Category) || "Women's Wear"
+      return {
+        description: item.description,
+        category: cat,
+        hsnSacCode: item.hsnSacCode || hsnForCategory(cat),
+        quantity: item.quantity,
+        rate: item.rate,
+        discount: 0,
+        gstRate: 12,
+        amount: item.quantity * item.rate,
+      }
+    }) || [
+      {
+        description: '',
+        category: "Women's Wear",
+        hsnSacCode: CATEGORY_HSN["Women's Wear"],
+        quantity: 1,
+        rate: 0,
+        discount: 0,
+        gstRate: 12,
+        amount: 0,
+      },
+    ]
   )
   const [submitting, setSubmitting] = useState(false)
 
+  // Restore draft for new bills
   useEffect(() => {
-    fetch('/api/business').then(r => r.json()).then(d => { if (d && !d.error) setSettings(d) })
-  }, [])
+    if (isEdit) return
+    const t = window.setTimeout(() => {
+      try {
+        const raw = localStorage.getItem(DRAFT_KEY)
+        if (!raw) return
+        const draft = JSON.parse(raw)
+        if (draft.customerName) setCustomerName(draft.customerName)
+        if (draft.customerPhone) setCustomerPhone(draft.customerPhone)
+        if (draft.customerAddress) setCustomerAddress(draft.customerAddress)
+        if (draft.customerId) setCustomerId(draft.customerId)
+        if (draft.paymentMode) setPaymentMode(draft.paymentMode)
+        if (draft.invoiceDate) setInvoiceDate(draft.invoiceDate)
+        if (typeof draft.overallDiscount === 'number') setOverallDiscount(draft.overallDiscount)
+        if (Array.isArray(draft.items) && draft.items.length) setItems(draft.items)
+      } catch {
+        /* ignore corrupt draft */
+      }
+    }, 0)
+    return () => window.clearTimeout(t)
+  }, [isEdit])
 
+  // Autosave draft
   useEffect(() => {
-    if (customerPhone.length >= 3) {
-      fetch(`/api/customers?query=${customerPhone}`)
-        .then(r => r.json())
-        .then(d => { if (Array.isArray(d)) { setCustomerSuggestions(d); setShowSuggestions(true) } })
-    } else { setCustomerSuggestions([]); setShowSuggestions(false) }
-  }, [customerPhone])
+    if (isEdit) return
+    const t = window.setTimeout(() => {
+      try {
+        localStorage.setItem(
+          DRAFT_KEY,
+          JSON.stringify({
+            customerId,
+            customerName,
+            customerPhone,
+            customerAddress,
+            invoiceDate,
+            paymentMode,
+            overallDiscount,
+            items,
+          })
+        )
+      } catch {
+        /* ignore */
+      }
+    }, 400)
+    return () => window.clearTimeout(t)
+  }, [
+    isEdit,
+    customerId,
+    customerName,
+    customerPhone,
+    customerAddress,
+    invoiceDate,
+    paymentMode,
+    overallDiscount,
+    items,
+  ])
+
+  // Customer suggest on phone or name (debounced)
+  useEffect(() => {
+    const q = customerPhone.length >= 3 ? customerPhone : customerName.length >= 2 ? customerName : ''
+    const t = window.setTimeout(() => {
+      if (!q) {
+        setCustomerSuggestions([])
+        setShowSuggestions(false)
+        return
+      }
+      fetch(`/api/customers?query=${encodeURIComponent(q)}`)
+        .then((r) => r.json())
+        .then((d) => {
+          if (Array.isArray(d)) {
+            setCustomerSuggestions(d)
+            setShowSuggestions(d.length > 0)
+          }
+        })
+        .catch(() => {})
+    }, 250)
+    return () => window.clearTimeout(t)
+  }, [customerPhone, customerName])
 
   const handleSelectCustomer = (c: Customer) => {
-    setCustomerId(c.id); setCustomerName(c.name); setCustomerPhone(c.phone)
-    setCustomerAddress(c.address || ''); setShowSuggestions(false)
+    setCustomerId(c.id)
+    setCustomerName(c.name)
+    setCustomerPhone(c.phone)
+    setCustomerAddress(c.address || '')
+    setShowSuggestions(false)
+    setErrors((e) => ({ ...e, customerName: '', customerPhone: '' }))
   }
 
-  const handleItemChange = (index: number, field: keyof InvoiceItemInput, value: any) => {
-    const updated = [...items]
-    ;(updated[index] as any)[field] = value
-    const qty  = parseFloat(updated[index].quantity as any) || 0
-    const rate = parseFloat(updated[index].rate as any)     || 0
-    updated[index].amount = qty * rate
+  const handleItemChange = (index: number, field: keyof InvoiceItemInput, value: string | number) => {
+    const updated = items.map((item, i) => {
+      if (i !== index) return item
+      const next = { ...item, [field]: value } as InvoiceItemInput
+      if (field === 'category') {
+        next.hsnSacCode = hsnForCategory(String(value))
+      }
+      const qty = parseFloat(String(next.quantity)) || 0
+      const rate = parseFloat(String(next.rate)) || 0
+      next.amount = qty * rate
+      return next
+    })
     setItems(updated)
   }
 
-  const addItem = () => setItems([...items, { description: '', category: "Women's Wear", hsnSacCode: 'HSN 6204', quantity: 1, rate: 0, discount: 0, gstRate: 12, amount: 0 }])
-  const removeItem = (i: number) => { if (items.length > 1) setItems(items.filter((_, idx) => idx !== i)) }
+  const addItem = () =>
+    setItems([
+      ...items,
+      {
+        description: '',
+        category: "Women's Wear",
+        hsnSacCode: CATEGORY_HSN["Women's Wear"],
+        quantity: 1,
+        rate: 0,
+        discount: 0,
+        gstRate: 12,
+        amount: 0,
+      },
+    ])
 
-  // Sum of (quantity * rate) of all items
-  const subtotal = items.reduce((s, i) => s + i.amount, 0)
-  
-  // Taxable Value after overall discount deduction
-  const taxableAmount = Math.max(0, subtotal - overallDiscount)
-  
-  // CGST and SGST at 6% each
-  const cgstAmount = Math.round((taxableAmount * 0.06) * 100) / 100
-  const sgstAmount = Math.round((taxableAmount * 0.06) * 100) / 100
-  
-  // Grand total
-  const totalAmount = taxableAmount + cgstAmount + sgstAmount
-
-  // Initials generator
-  const getInitials = (name: string) => {
-    if (!name) return 'C'
-    return name.trim().split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
+  const applyTemplate = (tpl: (typeof ITEM_TEMPLATES)[number]) => {
+    const emptyIdx = items.findIndex((i) => !i.description && !i.rate)
+    if (emptyIdx >= 0) {
+      const updated = [...items]
+      updated[emptyIdx] = {
+        ...updated[emptyIdx],
+        description: tpl.description,
+        category: tpl.category,
+        hsnSacCode: CATEGORY_HSN[tpl.category],
+        rate: tpl.defaultRate || 0,
+        amount: (updated[emptyIdx].quantity || 1) * (tpl.defaultRate || 0),
+      }
+      setItems(updated)
+    } else {
+      setItems([
+        ...items,
+        {
+          description: tpl.description,
+          category: tpl.category,
+          hsnSacCode: CATEGORY_HSN[tpl.category],
+          quantity: 1,
+          rate: tpl.defaultRate || 0,
+          discount: 0,
+          gstRate: 12,
+          amount: tpl.defaultRate || 0,
+        },
+      ])
+    }
   }
 
+  const removeItem = (i: number) => {
+    if (items.length > 1) setItems(items.filter((_, idx) => idx !== i))
+  }
+
+  const subtotal = items.reduce((s, i) => s + i.amount, 0)
+  const { taxableAmount, cgstAmount, sgstAmount, totalAmount } = computeBillTotals(subtotal, overallDiscount)
+
   const handleSubmit = async () => {
-    if (!customerName || !customerPhone) return alert('Please fill Customer Name and Phone.')
-    if (items.some(i => !i.description || i.rate <= 0)) return alert('Please fill all item descriptions and rates.')
+    const next: Record<string, string> = {}
+    if (!customerName.trim()) next.customerName = 'Customer name is required'
+    if (!customerPhone.trim()) next.customerPhone = 'Phone number is required'
+    if (items.some((i) => !i.description.trim() || i.rate <= 0)) {
+      next.items = 'Each item needs a description and rate greater than zero'
+    }
+    if (overallDiscount > subtotal) next.discount = 'Discount cannot exceed the subtotal'
+    setErrors(next)
+    if (Object.keys(next).length > 0) {
+      toast.error('Please fix the highlighted fields')
+      return
+    }
     setSubmitting(true)
 
-    // Items array with fixed values to satisfy database schema constraints
-    const payloadItems = items.map(item => ({
+    const payloadItems = items.map((item) => ({
       ...item,
-      category: "Women's Wear",
-      hsnSacCode: "HSN 6204",
+      category: item.category,
+      hsnSacCode: item.hsnSacCode || hsnForCategory(item.category),
       discount: 0,
       gstRate: 12,
     }))
@@ -132,259 +312,324 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
       paymentMode,
       items: payloadItems,
       isFinalized: true,
-      isFinalizing: true
+      isFinalizing: true,
     }
 
     try {
-      const url = isEdit ? `/api/invoices/${initialInvoice.id}` : '/api/invoices'
-      const res = await fetch(url, { method: isEdit ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-      if (res.ok) { const saved = await res.json(); router.push(`/invoices/${saved.id}`) }
-      else { const e = await res.json(); alert(`Error: ${e.error || 'Failed'}`) }
-    } catch { alert('Failed to submit. Try again.') }
-    finally { setSubmitting(false) }
+      const url = isEdit ? `/api/invoices/${initialInvoice!.id}` : '/api/invoices'
+      const res = await fetch(url, {
+        method: isEdit ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      if (res.ok) {
+        const saved = await res.json()
+        try {
+          localStorage.removeItem(DRAFT_KEY)
+        } catch {
+          /* ignore */
+        }
+        toast.success('Receipt ready')
+        router.push(`/invoices/${saved.id}`)
+      } else {
+        const e = await res.json().catch(() => ({}))
+        toast.error(e.error || 'Could not save the bill')
+      }
+    } catch {
+      toast.error('Could not save — check connection and try again')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
+  const paymentModes = [
+    { mode: 'UPI', label: 'UPI GPay', icon: <Smartphone className="w-3.5 h-3.5" /> },
+    { mode: 'Cash', label: 'Cash', icon: <Coins className="w-3.5 h-3.5" /> },
+    { mode: 'Card', label: 'Card', icon: <CreditCard className="w-3.5 h-3.5" /> },
+    { mode: 'Bank Transfer', label: 'Bank', icon: <Landmark className="w-3.5 h-3.5" /> },
+  ]
+
+  const summaryBlock = (
+    <div className="space-y-2 text-sm font-semibold">
+      <div className="flex justify-between text-ink-500">
+        <span>Subtotal</span>
+        <span className="font-mono tabular-nums">₹{subtotal.toFixed(2)}</span>
+      </div>
+      <div className="flex justify-between text-rose-600 border-b border-ink-100 pb-2">
+        <span>Discount</span>
+        <span className="font-mono tabular-nums">-₹{overallDiscount.toFixed(2)}</span>
+      </div>
+      <div className="flex justify-between text-ink-900 font-bold pt-1">
+        <span>Taxable</span>
+        <span className="font-mono tabular-nums">₹{taxableAmount.toFixed(2)}</span>
+      </div>
+      <div className="flex justify-between text-ink-500 font-medium">
+        <span>CGST (6%)</span>
+        <span className="font-mono tabular-nums">₹{cgstAmount.toFixed(2)}</span>
+      </div>
+      <div className="flex justify-between text-ink-500 font-medium">
+        <span>SGST (6%)</span>
+        <span className="font-mono tabular-nums">₹{sgstAmount.toFixed(2)}</span>
+      </div>
+      <div className="border-t border-ink-100 pt-3 flex justify-between items-end text-ink-900">
+        <span className="font-serif text-base font-semibold">Grand Total</span>
+        <span className="font-mono text-xl font-bold tabular-nums border-b-2 border-gold-600 pb-0.5">
+          ₹{totalAmount.toFixed(2)}
+        </span>
+      </div>
+    </div>
+  )
+
   return (
-    <div className="space-y-6 max-w-6xl pb-24 md:pb-6 animate-in fade-in duration-350 relative">
-      
-      {/* Header */}
+    <div className="space-y-6 max-w-6xl pb-28 md:pb-6 animate-in fade-in duration-300 relative">
       <div className="flex items-center gap-3 pb-4 border-b border-ink-100">
-        <Link href="/" className="p-2.5 rounded-xl border border-ink-100 text-ink-500 hover:bg-ink-100/30 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center">
+        <Link
+          href="/"
+          className="p-2.5 rounded-xl border border-ink-100 text-ink-500 hover:bg-ink-100/30 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+          aria-label="Back to dashboard"
+        >
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h2 className="font-serif text-xl font-bold text-ink-900">
+          <h2 className="font-serif text-2xl font-bold text-ink-900">
             {isEdit ? 'Edit Receipt' : 'Create New Bill'}
           </h2>
-          <p className="text-xs text-ink-500 mt-0.5 font-medium">
-            Issue boutique bills, apply discounts, and record payment modes
+          <p className="text-sm text-ink-500 mt-0.5 font-medium">
+            Issue boutique bills, apply discounts, and record payment
           </p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        {/* ── Left: Customer + Line Items ── */}
         <div className="lg:col-span-2 space-y-6">
-
-          {/* Customer Card */}
+          {/* Customer */}
           <div className="bg-white border border-ink-100 rounded-2xl p-4 md:p-6 space-y-5 relative shadow-[0_1px_3px_rgba(26,24,20,0.02),0_8px_24px_-12px_rgba(26,24,20,0.05)]">
             <div className="flex justify-between items-center border-b border-ink-100 pb-3">
-              <h3 className="text-sm font-bold text-ink-900">Customer Profile Ledger</h3>
+              <h3 className="text-sm font-bold text-ink-900">Customer</h3>
               {customerId && (
-                <span className="flex items-center gap-1 text-[9px] font-bold text-ink-700 bg-ink-100 border border-ink-100 px-2.5 py-1 rounded-full uppercase tracking-wider">
-                  <UserCheck className="w-3 h-3 text-ink-700" /> Returning Client
+                <span className="flex items-center gap-1 text-[11px] font-bold text-gold-600 bg-gold-100 border border-gold-600/15 px-2.5 py-1 rounded-full">
+                  <UserCheck className="w-3 h-3" /> Returning client
                 </span>
               )}
             </div>
 
             <div className="flex flex-col sm:flex-row gap-5 items-start">
-              {/* Initials Avatar */}
-              <div className="w-14 h-14 rounded-full bg-ink-100 border border-ink-100 flex items-center justify-center text-ink-700 font-serif text-lg font-bold flex-shrink-0 select-none">
-                {getInitials(customerName)}
-              </div>
-
+              <Avatar name={customerName} size="lg" />
               <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Phone */}
-                <div className="relative">
-                  <label className={labelCls}>Phone Number</label>
-                  <input
-                    type="tel"
-                    inputMode="tel"
-                    autoComplete="tel"
-                    enterKeyHint="next"
-                    placeholder="e.g. 9876543210"
-                    value={customerPhone}
-                    onChange={e => { setCustomerPhone(e.target.value); setCustomerId('') }}
-                    className={inputCls}
-                  />
-
-                  {/* Desktop Dropdown Autocomplete */}
-                  {showSuggestions && customerSuggestions.length > 0 && (
-                    <div className="hidden md:block absolute left-0 right-0 top-full mt-1 bg-white border border-ink-100 rounded-xl shadow-lg z-20 max-h-44 overflow-y-auto divide-y divide-ink-100">
-                      {customerSuggestions.map(c => (
-                        <button key={c.id} type="button" onClick={() => handleSelectCustomer(c)}
-                          className="w-full text-left px-4 py-2.5 text-xs hover:bg-paper/40 flex justify-between items-center transition-colors">
-                          <div>
-                            <span className="font-semibold text-ink-900 block">{c.name}</span>
-                            <span className="text-ink-300 font-mono">{c.phone}</span>
-                          </div>
-                          <Check className="w-3.5 h-3.5 text-ink-900" />
-                        </button>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Mobile Suggestions Bottom Sheet Drawer */}
-                  {showSuggestions && customerSuggestions.length > 0 && (
-                    <>
-                      <div
-                        onClick={() => setShowSuggestions(false)}
-                        className="fixed inset-0 bg-ink-900/35 backdrop-blur-xs z-40 md:hidden animate-in fade-in"
-                      />
-                      <div className="fixed inset-x-0 bottom-0 bg-white border-t border-ink-100 rounded-t-2xl shadow-xl z-50 p-4 pb-safe animate-in slide-in-from-bottom duration-200 md:hidden max-h-[45vh] flex flex-col">
-                        <div className="flex justify-between items-center pb-3 border-b border-ink-100 mb-2">
-                          <span className="text-xs font-bold text-ink-900 uppercase tracking-wider">Matching Clients</span>
+                <Field label="Phone number" error={errors.customerPhone}>
+                  <div className="relative">
+                    <input
+                      type="tel"
+                      inputMode="tel"
+                      autoComplete="tel"
+                      enterKeyHint="next"
+                      placeholder="e.g. 9876543210"
+                      value={customerPhone}
+                      onChange={(e) => {
+                        setCustomerPhone(e.target.value)
+                        setCustomerId('')
+                      }}
+                      className={cn(inputCls, errors.customerPhone && 'border-rose-300')}
+                    />
+                    {showSuggestions && customerSuggestions.length > 0 && (
+                      <div className="hidden md:block absolute left-0 right-0 top-full mt-1 bg-white border border-ink-100 rounded-xl shadow-lg z-20 max-h-44 overflow-y-auto divide-y divide-ink-100">
+                        {customerSuggestions.map((c) => (
                           <button
+                            key={c.id}
                             type="button"
-                            onClick={() => setShowSuggestions(false)}
-                            className="p-1 rounded-lg text-ink-300 hover:text-ink-900 flex items-center justify-center min-w-[44px] min-h-[44px]"
+                            onClick={() => handleSelectCustomer(c)}
+                            className="w-full text-left px-4 py-2.5 text-sm hover:bg-paper/40 flex justify-between items-center"
                           >
-                            <X className="w-5 h-5" />
+                            <div>
+                              <span className="font-semibold text-ink-900 block">{c.name}</span>
+                              <span className="text-ink-400 font-mono text-xs">{c.phone}</span>
+                            </div>
+                            <Check className="w-3.5 h-3.5 text-gold-600" />
                           </button>
-                        </div>
-                        <div className="overflow-y-auto divide-y divide-ink-100 flex-1">
-                          {customerSuggestions.map(c => (
-                            <button
-                              key={c.id}
-                              type="button"
-                              onClick={() => handleSelectCustomer(c)}
-                              className="w-full text-left py-3 px-1 text-sm hover:bg-paper/40 flex justify-between items-center transition-colors active:bg-paper"
-                            >
-                              <div>
-                                <span className="font-bold text-ink-900 block">{c.name}</span>
-                                <span className="text-xs text-ink-500 font-mono">+91 {c.phone}</span>
-                              </div>
-                              <Check className="w-4 h-4 text-ink-900" />
-                            </button>
-                          ))}
-                        </div>
+                        ))}
                       </div>
-                    </>
-                  )}
-                </div>
+                    )}
+                  </div>
+                </Field>
 
-                {/* Name */}
-                <div>
-                  <label className={labelCls}>Customer Name</label>
+                <Field label="Customer name" error={errors.customerName}>
                   <input
                     type="text"
                     autoComplete="name"
                     enterKeyHint="next"
                     placeholder="Full name"
                     value={customerName}
-                    onChange={e => setCustomerName(e.target.value)}
-                    className={inputCls}
+                    onChange={(e) => setCustomerName(e.target.value)}
+                    className={cn(inputCls, errors.customerName && 'border-rose-300')}
                   />
-                </div>
+                </Field>
               </div>
             </div>
 
-            {/* Address */}
-            <div>
-              <div className="flex justify-between mb-1.5">
-                <label className={labelCls}>Address</label>
-                <span className="text-[10px] text-ink-300 font-medium">Optional</span>
-              </div>
+            {/* Mobile suggestions sheet */}
+            {showSuggestions && customerSuggestions.length > 0 && (
+              <>
+                <div
+                  onClick={() => setShowSuggestions(false)}
+                  className="fixed inset-0 bg-ink-900/35 backdrop-blur-[2px] z-40 md:hidden"
+                />
+                <div className="fixed inset-x-0 bottom-0 bg-white border-t border-ink-100 rounded-t-2xl shadow-xl z-50 p-4 pb-safe md:hidden max-h-[45vh] flex flex-col">
+                  <div className="flex justify-between items-center pb-3 border-b border-ink-100 mb-2">
+                    <span className="text-xs font-bold text-ink-900">Matching clients</span>
+                    <button
+                      type="button"
+                      onClick={() => setShowSuggestions(false)}
+                      className="min-w-[44px] min-h-[44px] flex items-center justify-center text-ink-400"
+                      aria-label="Close suggestions"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <div className="overflow-y-auto divide-y divide-ink-100 flex-1">
+                    {customerSuggestions.map((c) => (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => handleSelectCustomer(c)}
+                        className="w-full text-left py-3 px-1 text-sm flex justify-between items-center active:bg-paper"
+                      >
+                        <div>
+                          <span className="font-bold text-ink-900 block">{c.name}</span>
+                          <span className="text-xs text-ink-500 font-mono">+91 {c.phone}</span>
+                        </div>
+                        <Check className="w-4 h-4 text-gold-600" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+
+            <Field label="Address" hint="Optional">
               <input
                 type="text"
                 autoComplete="street-address"
                 enterKeyHint="done"
-                placeholder="Residential address (rental or fittings details)"
+                placeholder="Residential address"
                 value={customerAddress}
-                onChange={e => setCustomerAddress(e.target.value)}
+                onChange={(e) => setCustomerAddress(e.target.value)}
                 className={inputCls}
               />
-            </div>
+            </Field>
           </div>
 
-          {/* Sleek Line Items Area */}
+          {/* Line items */}
           <div className="space-y-4">
-            <div className="flex justify-between items-center bg-paper/50 border border-ink-100 rounded-2xl px-4 md:px-5 py-4 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 bg-paper/50 border border-ink-100 rounded-2xl px-4 md:px-5 py-4">
               <div>
-                <h3 className="text-sm font-bold text-ink-900">Garments &amp; Stitching Services</h3>
-                <p className="text-[10px] text-ink-500 font-medium">List items or hire options below (GST flat @ 12%)</p>
+                <h3 className="text-sm font-bold text-ink-900">Garments & services</h3>
+                <p className="text-[11px] text-ink-500 font-medium">GST flat @ 12% (CGST 6% + SGST 6%)</p>
               </div>
-              <button
-                type="button"
-                onClick={addItem}
-                className="flex items-center justify-center gap-1.5 bg-ink-900 text-white hover:bg-ink-700 text-xs px-3.5 py-2.5 rounded-xl font-bold transition-all shadow-xs active:scale-95 min-w-[44px] min-h-[44px]"
-              >
-                <Plus className="w-3.5 h-3.5 text-white" />
-                Add Item
-              </button>
+              <Button type="button" variant="ink" size="sm" onClick={addItem}>
+                <Plus className="w-3.5 h-3.5" /> Add item
+              </Button>
             </div>
 
-            {/* Item cards collection */}
+            {/* Templates */}
+            <div className="flex flex-wrap gap-2">
+              {ITEM_TEMPLATES.map((tpl) => (
+                <button
+                  key={tpl.label}
+                  type="button"
+                  onClick={() => applyTemplate(tpl)}
+                  className="text-[11px] font-semibold px-3 py-1.5 rounded-full border border-ink-100 bg-white text-ink-600 hover:border-gold-600/40 hover:bg-gold-100/40 hover:text-ink-900 transition-colors"
+                >
+                  {tpl.label}
+                </button>
+              ))}
+            </div>
+
+            {errors.items && (
+              <p className="text-[11px] text-rose-600 font-medium">{errors.items}</p>
+            )}
+
             <div className="space-y-4">
               {items.map((item, index) => (
                 <div
                   key={index}
-                  className="bg-white border border-ink-100 rounded-2xl p-4 md:p-5 space-y-4 hover:border-ink-300 hover:shadow-[0_4px_12px_rgba(26,24,20,0.02)] transition-all duration-200 relative group"
+                  className="bg-white border border-ink-100 rounded-2xl p-4 md:p-5 space-y-4 hover:border-ink-300 transition-all relative"
                 >
-                  {/* Top card bar: index indicator + actions */}
                   <div className="flex justify-between items-center border-b border-ink-100 pb-2.5">
-                    <span className="text-[10px] font-bold text-ink-700 uppercase tracking-widest bg-ink-100 border border-ink-100/30 rounded-lg px-2.5 py-1 flex items-center gap-1 select-none">
-                      <Sparkle className="w-3 h-3 text-ink-500" /> Item #{index + 1}
+                    <span className="text-[11px] font-bold text-gold-600 bg-gold-100 border border-gold-600/15 rounded-lg px-2.5 py-1 flex items-center gap-1">
+                      <Sparkle className="w-3 h-3" /> Item {index + 1}
                     </span>
                     {items.length > 1 && (
                       <button
                         type="button"
                         onClick={() => removeItem(index)}
-                        className="text-ink-300 hover:text-red-500 hover:bg-rose-50 rounded-xl transition-all flex items-center justify-center min-w-[44px] min-h-[44px]"
-                        title="Delete item"
+                        className="text-ink-300 hover:text-rose-600 hover:bg-rose-50 rounded-xl min-w-[44px] min-h-[44px] flex items-center justify-center"
+                        aria-label={`Remove item ${index + 1}`}
                       >
-                        <Trash2 className="w-4.5 h-4.5" />
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     )}
                   </div>
 
-                  {/* Fields structure */}
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-                    {/* Item Description (Left, takes remaining space) */}
-                    <div className="md:col-span-6 space-y-1">
-                      <label className={labelCls}>Item Description</label>
+                    <div className="md:col-span-5 space-y-1">
+                      <label className={labelCls}>Description</label>
                       <input
                         type="text"
-                        placeholder="e.g. Bridal Lehenga custom fitting, Men's Suit stitching"
+                        placeholder="e.g. Bridal Lehenga custom fitting"
                         value={item.description}
-                        onChange={e => handleItemChange(index, 'description', e.target.value)}
+                        onChange={(e) => handleItemChange(index, 'description', e.target.value)}
                         className={inputCls}
                       />
                     </div>
-
-                    {/* Quantity (Center) */}
-                    <div className="md:col-span-2 space-y-1">
+                    <div className="md:col-span-3 space-y-1">
+                      <label className={labelCls}>Category</label>
+                      <select
+                        value={item.category}
+                        onChange={(e) => handleItemChange(index, 'category', e.target.value)}
+                        className={inputCls}
+                      >
+                        {CATEGORIES.map((c) => (
+                          <option key={c} value={c}>
+                            {c}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="md:col-span-1 space-y-1">
                       <label className={labelCls}>Qty</label>
                       <input
                         type="number"
-                        min="1"
+                        min={1}
                         inputMode="numeric"
-                        enterKeyHint="next"
-                        placeholder="1"
                         value={item.quantity}
-                        onChange={e => handleItemChange(index, 'quantity', parseInt(e.target.value) || 0)}
-                        className="w-full bg-white border border-ink-100 rounded-xl px-3.5 py-2.5 text-base md:text-xs text-ink-900 focus:outline-none focus:border-ink-550 focus:ring-1 focus:ring-ink-550/20 text-center transition-all font-semibold input-mobile-lg"
+                        onChange={(e) => handleItemChange(index, 'quantity', parseInt(e.target.value) || 0)}
+                        className={cn(inputCls, 'text-center')}
                       />
                     </div>
-
-                    {/* Rate (Right) */}
-                    <div className="md:col-span-4 space-y-1">
+                    <div className="md:col-span-3 space-y-1">
                       <label className={labelCls}>Rate (₹)</label>
-                      <div className="relative rounded-xl border border-ink-100 bg-white focus-within:border-ink-550 focus-within:ring-1 focus-within:ring-ink-550/20 transition-all">
-                        <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-ink-300 text-xs select-none">
+                      <div className="relative rounded-xl border border-ink-100 bg-white focus-within:border-gold-600 focus-within:ring-2 focus-within:ring-gold-600/15">
+                        <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-ink-400 text-xs">
                           ₹
                         </span>
                         <input
                           type="number"
-                          min="0"
+                          min={0}
                           inputMode="decimal"
-                          enterKeyHint="next"
                           placeholder="0.00"
                           value={item.rate || ''}
-                          onChange={e => handleItemChange(index, 'rate', parseFloat(e.target.value) || 0)}
-                          className="w-full bg-transparent border-0 rounded-xl pl-8 pr-3.5 py-2.5 text-base md:text-xs text-ink-900 focus:outline-none text-right font-semibold font-mono input-mobile-lg"
+                          onChange={(e) => handleItemChange(index, 'rate', parseFloat(e.target.value) || 0)}
+                          className="w-full bg-transparent border-0 rounded-xl pl-8 pr-3.5 py-2.5 text-base md:text-sm text-ink-900 focus:outline-none text-right font-semibold font-mono input-mobile-lg"
                         />
                       </div>
                     </div>
                   </div>
 
-                  {/* Subtotal badge inside the item row */}
-                  <div className="flex justify-between items-center bg-paper/50 rounded-xl p-3 border border-ink-100/50 text-[10px] font-semibold">
-                    <span className="text-ink-500">GST @ 12% computed automatically</span>
+                  <div className="flex justify-between items-center bg-paper/50 rounded-xl p-3 border border-ink-100/50 text-[11px] font-semibold">
+                    <span className="text-ink-500 font-mono">{item.hsnSacCode}</span>
                     <div className="flex items-center gap-1.5 text-ink-900 font-bold">
-                      <span className="text-ink-500 font-medium">Line Total:</span>
-                      <span className="text-xs text-ink-900 bg-white border border-ink-100 px-2.5 py-1 rounded-lg shadow-2xs font-mono font-bold">
+                      <span className="text-ink-500 font-medium">Line total</span>
+                      <span className="text-xs bg-white border border-ink-100 px-2.5 py-1 rounded-lg font-mono tabular-nums">
                         ₹{item.amount.toFixed(2)}
                       </span>
                     </div>
@@ -393,104 +638,67 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
               ))}
             </div>
 
-            {/* Bottom Add Item row */}
             <button
               type="button"
               onClick={addItem}
-              className="w-full flex items-center justify-center gap-2 border-2 border-dashed border-ink-100 hover:border-ink-300 text-ink-300 hover:text-ink-900 bg-white/50 hover:bg-white py-4 rounded-2xl text-xs font-bold transition-all select-none min-h-[44px]"
+              className="w-full flex items-center justify-center gap-2 border-2 border-dashed border-ink-100 hover:border-gold-600/40 text-ink-400 hover:text-ink-900 bg-white/50 hover:bg-white py-4 rounded-2xl text-xs font-bold transition-all min-h-[44px]"
             >
-              <Plus className="w-4 h-4 text-ink-700" />
-              Add another boutique garment / stitching service
+              <Plus className="w-4 h-4" />
+              Add another item
             </button>
           </div>
         </div>
 
-        {/* ── Right: Bill Settings + Summary ── */}
+        {/* Right column */}
         <div className="space-y-6">
-
-          {/* Bill Settings */}
           <div className="bg-white border border-ink-100 rounded-2xl p-5 space-y-4 shadow-[0_1px_3px_rgba(26,24,20,0.02),0_8px_24px_-12px_rgba(26,24,20,0.05)]">
-            <h3 className="text-xs font-bold text-ink-900 uppercase tracking-wider border-b border-ink-100 pb-2">Bill Parameters</h3>
-            <div>
-              <label className={labelCls}>Billing Date</label>
-              <input type="date" value={invoiceDate} onChange={e => setInvoiceDate(e.target.value)} className={inputCls} />
-            </div>
+            <h3 className="text-xs font-bold text-ink-900 tracking-wide border-b border-ink-100 pb-2">
+              Bill date
+            </h3>
+            <input
+              type="date"
+              value={invoiceDate}
+              onChange={(e) => setInvoiceDate(e.target.value)}
+              className={inputCls}
+            />
           </div>
 
-          {/* Payment Summary (Desktop Only, Hidden on Mobile in favor of bottom bar) */}
           <div className="hidden md:block bg-white border border-ink-100 rounded-2xl p-5 space-y-5 sticky top-6 shadow-[0_1px_3px_rgba(26,24,20,0.02),0_8px_24px_-12px_rgba(26,24,20,0.05)]">
-            <h3 className="text-xs font-bold text-ink-900 uppercase tracking-wider border-b border-ink-100 pb-2">Checkout Summary</h3>
+            <h3 className="text-xs font-bold text-ink-900 tracking-wide border-b border-ink-100 pb-2">
+              Checkout summary
+            </h3>
+            {summaryBlock}
 
-            <div className="space-y-2 text-xs font-semibold">
-              <div className="flex justify-between text-ink-500">
-                <span>Subtotal (Items Sum)</span>
-                <span className="font-mono">{subtotal.toFixed(2)}</span>
-              </div>
-              
-              <div className="flex justify-between text-rose-600 border-b border-ink-100 pb-2">
-                <span>Overall Discount</span>
-                <span className="font-mono">-₹{overallDiscount.toFixed(2)}</span>
-              </div>
-              
-              <div className="flex justify-between text-ink-900 font-bold pt-1.5">
-                <span>Taxable Subtotal</span>
-                <span className="font-mono">₹{taxableAmount.toFixed(2)}</span>
-              </div>
-              
-              <div className="flex justify-between text-ink-500 font-medium">
-                <span>CGST (6%)</span>
-                <span className="font-mono">₹{cgstAmount.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-ink-500 font-medium">
-                <span>SGST (6%)</span>
-                <span className="font-mono">₹{sgstAmount.toFixed(2)}</span>
-              </div>
-              
-              <div className="border-t border-ink-300 pt-3 flex justify-between items-center text-ink-900">
-                <span className="font-serif text-sm font-bold">Grand Total</span>
-                <div className="text-right">
-                  <span className="font-serif text-lg font-bold border-b-2 border-ink-900 pb-0.5 font-mono">
-                    ₹{totalAmount.toFixed(2)}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Discount Input field */}
             <div className="pt-3 border-t border-ink-100">
-              <label className={labelCls}>Discount Amount (₹)</label>
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                placeholder="0.00"
-                value={overallDiscount || ''}
-                onChange={e => setOverallDiscount(Math.max(0, parseFloat(e.target.value) || 0))}
-                className={inputCls}
-              />
+              <Field label="Discount (₹)" error={errors.discount}>
+                <input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  placeholder="0.00"
+                  value={overallDiscount || ''}
+                  onChange={(e) => setOverallDiscount(Math.max(0, parseFloat(e.target.value) || 0))}
+                  className={inputCls}
+                />
+              </Field>
             </div>
 
-            {/* Segmented Button Group for Payment Mode */}
             <div className="space-y-2">
-              <label className={labelCls}>Mode of Payment</label>
+              <label className={labelCls}>Payment mode</label>
               <div className="grid grid-cols-2 gap-2">
-                {[
-                  { mode: 'UPI', label: 'UPI GPay', icon: <Smartphone className="w-3.5 h-3.5" /> },
-                  { mode: 'Cash', label: 'Cash In Hand', icon: <Coins className="w-3.5 h-3.5" /> },
-                  { mode: 'Card', label: 'Swipe Card', icon: <CreditCard className="w-3.5 h-3.5" /> },
-                  { mode: 'Bank Transfer', label: 'Bank IMPS', icon: <Landmark className="w-3.5 h-3.5" /> },
-                ].map(item => {
+                {paymentModes.map((item) => {
                   const active = paymentMode === item.mode
                   return (
                     <button
                       key={item.mode}
                       type="button"
                       onClick={() => setPaymentMode(item.mode)}
-                      className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl border text-[10px] font-bold tracking-wide transition-all select-none min-h-[44px] justify-center ${
+                      className={cn(
+                        'flex items-center gap-1.5 px-3 py-2.5 rounded-xl border text-[11px] font-bold transition-all min-h-[44px] justify-center',
                         active
-                          ? 'bg-ink-900 border-ink-900 text-white shadow-xs'
-                          : 'bg-white border-ink-100 text-ink-500 hover:bg-ink-100/20 hover:text-ink-900'
-                      }`}
+                          ? 'bg-ink-900 border-ink-900 text-white'
+                          : 'bg-white border-ink-100 text-ink-500 hover:bg-ink-100/20'
+                      )}
                     >
                       {item.icon}
                       <span>{item.label}</span>
@@ -500,61 +708,51 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="pt-2 border-t border-ink-100">
-              <button
-                type="button"
-                disabled={submitting}
-                onClick={handleSubmit}
-                className="w-full flex items-center justify-center gap-2 bg-ink-900 hover:bg-ink-700 text-white py-3.5 rounded-xl text-xs font-bold tracking-wider uppercase transition-colors disabled:opacity-50 active:scale-95 shadow-md min-h-[44px]"
-              >
-                <Sparkles className="w-4 h-4 text-white" />
-                {submitting ? 'Generating...' : 'Generate & Print Receipt'}
-              </button>
-            </div>
+            <Button
+              type="button"
+              variant="gold"
+              className="w-full uppercase tracking-wider text-xs"
+              loading={submitting}
+              onClick={handleSubmit}
+            >
+              <Sparkles className="w-4 h-4" />
+              Generate & print receipt
+            </Button>
           </div>
 
-          {/* Mobile Pricing Inputs & Mode Selector Card */}
-          <div className="md:hidden bg-white border border-ink-100 rounded-2xl p-5 space-y-4 shadow-sm select-none">
-            <h3 className="text-xs font-bold text-ink-900 uppercase tracking-wider border-b border-ink-100 pb-2">Checkout Details</h3>
-            
-            {/* Discount */}
-            <div>
-              <label className={labelCls}>Discount Amount (₹)</label>
+          {/* Mobile checkout fields */}
+          <div className="md:hidden bg-white border border-ink-100 rounded-2xl p-5 space-y-4">
+            <h3 className="text-xs font-bold text-ink-900 tracking-wide border-b border-ink-100 pb-2">
+              Checkout details
+            </h3>
+            <Field label="Discount (₹)" error={errors.discount}>
               <input
                 type="number"
-                min="0"
+                min={0}
                 step="0.01"
                 inputMode="decimal"
-                enterKeyHint="done"
                 placeholder="0.00"
                 value={overallDiscount || ''}
-                onChange={e => setOverallDiscount(Math.max(0, parseFloat(e.target.value) || 0))}
+                onChange={(e) => setOverallDiscount(Math.max(0, parseFloat(e.target.value) || 0))}
                 className={inputCls}
               />
-            </div>
-
-            {/* Payment modes on Mobile */}
+            </Field>
             <div className="space-y-2">
-              <label className={labelCls}>Mode of Payment</label>
+              <label className={labelCls}>Payment mode</label>
               <div className="grid grid-cols-2 gap-2">
-                {[
-                  { mode: 'UPI', label: 'UPI GPay', icon: <Smartphone className="w-3.5 h-3.5" /> },
-                  { mode: 'Cash', label: 'Cash In Hand', icon: <Coins className="w-3.5 h-3.5" /> },
-                  { mode: 'Card', label: 'Swipe Card', icon: <CreditCard className="w-3.5 h-3.5" /> },
-                  { mode: 'Bank Transfer', label: 'Bank IMPS', icon: <Landmark className="w-3.5 h-3.5" /> },
-                ].map(item => {
+                {paymentModes.map((item) => {
                   const active = paymentMode === item.mode
                   return (
                     <button
                       key={item.mode}
                       type="button"
                       onClick={() => setPaymentMode(item.mode)}
-                      className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl border text-[10px] font-bold tracking-wide transition-all min-h-[44px] justify-center ${
+                      className={cn(
+                        'flex items-center gap-1.5 px-3 py-2.5 rounded-xl border text-[11px] font-bold min-h-[44px] justify-center',
                         active
-                          ? 'bg-ink-900 border-ink-900 text-white shadow-xs'
+                          ? 'bg-ink-900 border-ink-900 text-white'
                           : 'bg-white border-ink-100 text-ink-500'
-                      }`}
+                      )}
                     >
                       {item.icon}
                       <span>{item.label}</span>
@@ -564,29 +762,22 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
               </div>
             </div>
           </div>
-
         </div>
       </div>
 
-      {/* ── MOBILE FIXED BOTTOM CTA BAR ── */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-ink-100 p-4 bar-safe z-30 flex items-center justify-between gap-4 shadow-[0_-8px_30px_rgba(26,24,20,0.08)]">
+      {/* Mobile fixed CTA — sits above bottom tab bar */}
+      <div className="md:hidden fixed bottom-[calc(3.5rem+env(safe-area-inset-bottom,0px))] left-0 right-0 bg-white border-t border-ink-100 p-3 z-30 flex items-center justify-between gap-4 shadow-[0_-8px_30px_rgba(26,24,20,0.08)]">
         <div>
-          <span className="block text-[8px] text-ink-300 uppercase tracking-wider font-bold">Total Bill</span>
-          <span className="font-serif text-lg font-bold text-ink-900 font-mono">
+          <span className="block text-[11px] text-ink-400 tracking-wide font-bold">Total</span>
+          <span className="font-serif text-lg font-bold text-ink-900 font-mono tabular-nums border-b-2 border-gold-600">
             ₹{totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
           </span>
         </div>
-        <button
-          type="button"
-          disabled={submitting}
-          onClick={handleSubmit}
-          className="flex-1 max-w-[200px] flex items-center justify-center gap-1.5 bg-ink-900 hover:bg-ink-700 text-white py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors disabled:opacity-50 active:scale-95 shadow-sm min-h-[44px]"
-        >
-          <Sparkles className="w-4 h-4 text-white" />
-          {submitting ? 'Billing...' : 'Generate Bill'}
-        </button>
+        <Button type="button" variant="gold" loading={submitting} onClick={handleSubmit} className="flex-1 max-w-[200px] text-xs uppercase">
+          <Sparkles className="w-4 h-4" />
+          Generate bill
+        </Button>
       </div>
-
     </div>
   )
 }

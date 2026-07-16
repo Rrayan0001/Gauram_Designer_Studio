@@ -3,21 +3,31 @@
 @theme {
   --color-ink-900: #1a1814;
   --color-ink-700: #3d3730;
+  --color-ink-600: #524a41;
   --color-ink-500: #6b6359;
+  --color-ink-400: #8a8175;
   --color-ink-300: #b5ada1;
   --color-ink-100: #ece7df;
   --color-paper: #faf8f4;
   --color-gold-600: #b08d3f;
   --color-gold-500: #c9a961;
   --color-gold-100: #f3ead2;
-  
-  --font-serif: var(--font-plus-jakarta), system-ui, -apple-system, sans-serif;
+  --color-rose-600: #e11d48;
+  --color-rose-700: #be123c;
+  --color-rose-50: #fff1f2;
+  --color-rose-100: #ffe4e6;
+  --color-rose-200: #fecdd3;
+  --color-emerald-600: #059669;
+  --color-emerald-50: #ecfdf5;
+  --color-emerald-200: #a7f3d0;
+
+  --font-serif: var(--font-display), "Georgia", "Times New Roman", serif;
   --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-mono), ui-monospace, monospace;
 }
 
 .font-mono {
-  letter-spacing: 0.05em;
+  letter-spacing: 0.02em;
 }
 
 :root {
@@ -27,6 +37,14 @@
   --card-border: #ece7df;
   --muted: #faf8f4;
   --muted-foreground: #6b6359;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --z-dropdown: 40;
+  --z-sticky: 30;
+  --z-modal: 50;
+  --z-toast: 60;
 }
 
 body {
@@ -37,9 +55,19 @@ body {
   padding: 0;
 }
 
+h1, h2, h3 {
+  text-wrap: balance;
+}
+
 /* Tabular numbers for aligning amounts */
 .tabular-nums {
   font-variant-numeric: tabular-nums;
+}
+
+/* Focus-visible default for interactive elements without custom rings */
+:focus-visible {
+  outline: 2px solid rgba(176, 141, 63, 0.45);
+  outline-offset: 2px;
 }
 
 /* Scrollbar styling */
@@ -60,15 +88,27 @@ input, select, textarea {
   padding-right: 12px;
   font-size: 14px;
   outline: none;
-  transition: all 0.15s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
   box-sizing: border-box;
 }
 input:focus, select:focus, textarea:focus {
   border-color: #b08d3f;
-  box-shadow: 0 0 0 1px rgba(176, 141, 63, 0.2);
+  box-shadow: 0 0 0 2px rgba(176, 141, 63, 0.15);
 }
 input::placeholder, textarea::placeholder {
-  color: #b5ada1;
+  color: #8a8175;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Print optimizations */
@@ -76,16 +116,19 @@ input::placeholder, textarea::placeholder {
   body { background: #fff !important; color: #000 !important; font-size: 11pt; }
   .no-print { display: none !important; }
   .print-only { display: block !important; }
+  .print-hide { display: none !important; }
+  .print-table { display: table !important; width: 100% !important; }
   .print-container {
     width: 100% !important; max-width: 100% !important;
     padding: 0 !important; margin: 0 !important;
     box-shadow: none !important; border: none !important;
     background: #fff !important; color: #000 !important;
+    border-radius: 0 !important;
   }
   .print-text-dark { color: #000 !important; }
   .print-border { border-color: #ccc !important; }
-  
-  /* Printable paid stamp details */
+  .print-gold { color: #7a5e1f !important; border-color: #7a5e1f !important; }
+
   .paid-stamp-print {
     border: 3px double #7a5e1f !important;
     color: #7a5e1f !important;
@@ -93,15 +136,7 @@ input::placeholder, textarea::placeholder {
 }
 .print-only { display: none; }
 
-/* ── Mobile Design Tokens ── */
-
-:root {
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --safe-left: env(safe-area-inset-left, 0px);
-  --safe-right: env(safe-area-inset-right, 0px);
-}
-
+/* Safe-area helpers */
 .pt-safe {
   padding-top: calc(var(--safe-top) + 0.5rem);
 }
@@ -132,6 +167,8 @@ button, a, [role="button"] {
   -webkit-tap-highlight-color: transparent;
 }
 
+
+
 /* Inputs must stay >=16px on mobile viewports to prevent iOS auto-zoom */
 @media (max-width: 767px) {
   input, select, textarea {
@@ -141,4 +178,3 @@ button, a, [role="button"] {
     font-size: 16px !important;
   }
 }
-

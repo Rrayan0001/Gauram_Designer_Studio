@@ -1,10 +1,15 @@
 import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans, Inter, JetBrains_Mono } from "next/font/google";
+import { Cormorant_Garamond, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import Sidebar from "@/components/Sidebar";
+import { ToastProvider } from "@/components/ui/Toast";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const plusJakarta = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-plus-jakarta" });
+const display = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-display",
+});
 const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 export const viewport: Viewport = {
@@ -26,14 +31,20 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${plusJakarta.variable} ${jetbrainsMono.variable} h-full`} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${inter.variable} ${display.variable} ${jetbrainsMono.variable} h-full`}
+      suppressHydrationWarning
+    >
       <body className="h-full flex flex-col md:flex-row antialiased font-sans" suppressHydrationWarning>
-        <Sidebar />
-        <main className="flex-1 overflow-auto bg-paper min-h-screen">
-          <div className="p-4 md:p-8 print-container">
-            {children}
-          </div>
-        </main>
+        <ToastProvider>
+          <Sidebar />
+          <main id="main" tabIndex={-1} className="flex-1 overflow-auto bg-paper min-h-screen outline-none">
+            <div className="p-4 md:p-8 pb-24 md:pb-8 print-container">
+              {children}
+            </div>
+          </main>
+        </ToastProvider>
       </body>
     </html>
   );
