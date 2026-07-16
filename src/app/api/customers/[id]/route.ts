@@ -14,7 +14,6 @@ export async function GET(
         invoices: {
           include: {
             items: true,
-            payments: true,
           },
           orderBy: { invoiceDate: 'desc' },
         },
@@ -40,6 +39,26 @@ export async function GET(
     return NextResponse.json(result)
   } catch (error: any) {
     console.error('Error fetching customer detail:', error)
+    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 })
+  }
+}
+
+export async function PUT(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params
+    const { notes } = await request.json()
+
+    const updated = await prisma.customer.update({
+      where: { id },
+      data: { notes }
+    })
+
+    return NextResponse.json(updated)
+  } catch (error: any) {
+    console.error('Error updating customer details:', error)
     return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 })
   }
 }

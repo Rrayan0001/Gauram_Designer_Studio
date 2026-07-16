@@ -1,17 +1,28 @@
 @import "tailwindcss";
 
 @theme {
+  --color-ink-900: #1a1814;
+  --color-ink-700: #3d3730;
+  --color-ink-500: #6b6359;
+  --color-ink-300: #b5ada1;
+  --color-ink-100: #ece7df;
+  --color-paper: #faf8f4;
+  --color-gold-600: #b08d3f;
+  --color-gold-500: #c9a961;
+  --color-gold-100: #f3ead2;
+  
   --font-serif: var(--font-cinzel), Georgia, serif;
   --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, monospace;
 }
 
 :root {
-  --background: #ffffff;
-  --foreground: #111111;
+  --background: #faf8f4;
+  --foreground: #1a1814;
   --card: #ffffff;
-  --card-border: #e5e7eb;
-  --muted: #f9fafb;
-  --muted-foreground: #6b7280;
+  --card-border: #ece7df;
+  --muted: #faf8f4;
+  --muted-foreground: #6b6359;
 }
 
 body {
@@ -22,17 +33,22 @@ body {
   padding: 0;
 }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: #f3f4f6; }
-::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+/* Tabular numbers for aligning amounts */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
 
-/* Input / select base */
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--background); }
+::-webkit-scrollbar-thumb { background: var(--card-border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #b5ada1; }
+
+/* Input / select base styles */
 input, select, textarea {
   background: #ffffff;
-  color: #111111;
-  border: 1px solid #e5e7eb;
+  color: var(--foreground);
+  border: 1px solid var(--card-border);
   border-radius: 8px;
   padding-top: 8px;
   padding-bottom: 8px;
@@ -40,17 +56,18 @@ input, select, textarea {
   padding-right: 12px;
   font-size: 14px;
   outline: none;
-  transition: border-color 0.15s;
+  transition: all 0.15s ease;
   box-sizing: border-box;
 }
 input:focus, select:focus, textarea:focus {
-  border-color: #374151;
+  border-color: #b08d3f;
+  box-shadow: 0 0 0 1px rgba(176, 141, 63, 0.2);
 }
 input::placeholder, textarea::placeholder {
-  color: #9ca3af;
+  color: #b5ada1;
 }
 
-/* Print */
+/* Print optimizations */
 @media print {
   body { background: #fff !important; color: #000 !important; font-size: 11pt; }
   .no-print { display: none !important; }
@@ -63,5 +80,11 @@ input::placeholder, textarea::placeholder {
   }
   .print-text-dark { color: #000 !important; }
   .print-border { border-color: #ccc !important; }
+  
+  /* Printable paid stamp details */
+  .paid-stamp-print {
+    border: 3px double #7a5e1f !important;
+    color: #7a5e1f !important;
+  }
 }
 .print-only { display: none; }

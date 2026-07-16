@@ -6,11 +6,15 @@ import {
   Receipt,
   Eye,
   PlusCircle,
-  Tag,
   Search,
-  RotateCcw
+  RotateCcw,
+  Sparkles,
+  Calendar,
+  Layers,
+  ArrowRight
 } from 'lucide-react'
 import Link from 'next/link'
+import { Card, Skeleton } from '@/components/ui/Kit'
 
 interface Invoice {
   id: string
@@ -42,15 +46,14 @@ export default function Dashboard() {
 
   // Filters state
   const [search, setSearch] = useState('')
-  const [categoryFilter, setCategoryFilter] = useState('')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
+  const [greeting, setGreeting] = useState('Good day')
 
   const fetchInvoices = async () => {
     try {
       const q = new URLSearchParams()
       if (search) q.append('search', search)
-      if (categoryFilter) q.append('category', categoryFilter)
       if (startDate) q.append('startDate', startDate)
       if (endDate) q.append('endDate', endDate)
 
@@ -66,147 +69,297 @@ export default function Dashboard() {
     }
   }
 
+  // Set greeting and fetch initial list
   useEffect(() => {
+    const hrs = new Date().getHours()
+    if (hrs < 12) setGreeting('Good morning')
+    else if (hrs < 17) setGreeting('Good afternoon')
+    else setGreeting('Good evening')
+
     fetchInvoices()
-  }, [search, categoryFilter, startDate, endDate])
+  }, [search, startDate, endDate])
 
   // Aggregate metrics
   const totalSales = invoices.reduce((sum, inv) => sum + inv.totalAmount, 0)
   const totalBillsCount = invoices.length
+  const avgBillValue = totalBillsCount > 0 ? totalSales / totalBillsCount : 0
 
-  // Category sales breakdown
-  const catSales: Record<string, number> = {}
-  invoices.forEach(inv => {
-    inv.items.forEach(item => {
-      const cat = item.category || "Women's Wear"
-      catSales[cat] = (catSales[cat] || 0) + item.amount
+  // Calculate current month's sales
+  const currentMonth = new Date().getMonth()
+  const currentYear = new Date().getFullYear()
+  const thisMonthSales = invoices
+    .filter(inv => {
+      const d = new Date(inv.invoiceDate)
+      return d.getMonth() === currentMonth && d.getFullYear() === currentYear
     })
-  })
-  const catTotal = Object.values(catSales).reduce((s, a) => s + a, 0)
+    .reduce((sum, inv) => sum + inv.totalAmount, 0)
+
+  // SVG Area Chart points generator (Past 6 months trend)
+  const renderTrendChart = () => {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    const salesByMonth: Record<string, number> = {}
+    
+    // Initialize past 6 months
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date()
+      d.setMonth(d.getMonth() - i)
+      const mName = months[d.getMonth()]
+      salesByMonth[mName] = 0
+    }
+    
+    invoices.forEach(inv => {
+      const d = new Date(inv.invoiceDate)
+      const mName = months[d.getMonth()]
+      if (salesByMonth[mName] !== undefined) {
+        salesByMonth[mName] += inv.totalAmount
+      }
+    })
+
+    const data = Object.entries(salesByMonth).map(([month, amount]) => ({ month, amount }))
+    const maxAmount = Math.max(...data.map(d => d.amount), 1000)
+
+    // Chart dimensions
+    const width = 500
+    const height = 120
+    const paddingX = 40
+    const paddingY = 20
+    const chartWidth = width - paddingX * 2
+    const chartHeight = height - paddingY * 2
+
+    const points = data.map((d, index) => {
+      const x = paddingX + (index / (data.length - 1)) * chartWidth
+      const y = height - paddingY - (d.amount / maxAmount) * chartHeight
+      return { x, y, month: d.month, amount: d.amount }
+    })
+
+    const linePath = points.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')
+    const areaPath = points.length > 0 
+      ? `${linePath} L ${points[points.length - 1].x} ${height - paddingY} L ${points[0].x} ${height - paddingY} Z`
+      : ''
+
+    return (
+      <div className="w-full">
+        <div className="flex justify-between items-center mb-4">
+          <div>
+            <h4 className="text-xs font-bold text-ink-900 uppercase tracking-wider">Revenue Trend</h4>
+            <p className="text-[10px] text-ink-500">Monthly settled boutique invoicing</p>
+          </div>
+          <span className="text-[10px] font-bold text-gold-600 bg-gold-100/50 border border-gold-600/10 px-2 py-0.5 rounded-full">6 Months</span>
+        </div>
+
+        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-36 overflow-visible font-sans text-[9px] font-medium fill-ink-500">
+          <defs>
+            <linearGradient id="area-grad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#c9a961" stopOpacity="0.25" />
+              <stop offset="100%" stopColor="#c9a961" stopOpacity="0.00" />
+            </linearGradient>
+          </defs>
+
+          {/* Grid lines */}
+          <line x1={paddingX} y1={paddingY} x2={width - paddingX} y2={paddingY} stroke="#ece7df" strokeDasharray="3 3" />
+          <line x1={paddingX} y1={height / 2} x2={width - paddingX} y2={height / 2} stroke="#ece7df" strokeDasharray="3 3" />
+          <line x1={paddingX} y1={height - paddingY} x2={width - paddingX} y2={height - paddingY} stroke="#ece7df" />
+
+          {/* Area Fill */}
+          {areaPath && <path d={areaPath} fill="url(#area-grad)" />}
+
+          {/* Line Path */}
+          {linePath && <path d={linePath} fill="none" stroke="#b08d3f" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />}
+
+          {/* Data Points */}
+          {points.map((p, idx) => (
+            <g key={idx} className="group">
+              <circle
+                cx={p.x}
+                cy={p.y}
+                r="4.5"
+                fill="#ffffff"
+                stroke="#b08d3f"
+                strokeWidth="2"
+                className="transition-all hover:r-6 cursor-pointer"
+              />
+              {/* Text tooltip on hover/render */}
+              <text x={p.x} y={p.y - 8} textAnchor="middle" className="text-[8px] font-mono fill-ink-900 font-bold">
+                {p.amount > 0 ? `₹${(p.amount / 1000).toFixed(1)}k` : ''}
+              </text>
+              {/* Month label */}
+              <text x={p.x} y={height - 6} textAnchor="middle" className="fill-ink-500 uppercase tracking-wider text-[8px] font-semibold">
+                {p.month}
+              </text>
+            </g>
+          ))}
+        </svg>
+      </div>
+    )
+  }
 
   return (
-    <div className="space-y-6">
-      {/* Page header */}
-      <div className="flex items-center justify-between">
+    <div className="space-y-8 animate-in fade-in duration-300">
+      
+      {/* Hero Greeting & Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Manage designer boutique orders and billing history</p>
+          <h1 className="font-serif text-3xl font-bold text-ink-900 tracking-tight flex items-center gap-2">
+            {greeting}, <span className="text-gold-600">Gauram Studio</span>
+          </h1>
+          <p className="text-xs text-ink-500 mt-1 font-medium flex items-center gap-1.5">
+            <Calendar className="w-3.5 h-3.5 text-gold-600" /> Stylist counter ledger dashboard &amp; billing panel
+          </p>
         </div>
         <Link
           href="/invoices/new"
-          className="flex items-center gap-2 bg-gray-900 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors"
+          className="flex items-center gap-2 bg-ink-900 hover:bg-ink-700 text-white px-5 py-3 rounded-xl text-xs font-bold tracking-wide transition-all shadow-[0_4px_12px_rgba(26,24,20,0.08)] active:scale-[0.98]"
         >
-          <PlusCircle className="w-4 h-4" />
-          New Bill
+          <PlusCircle className="w-4 h-4 text-gold-500" />
+          Create Bill
         </Link>
       </div>
 
-      {/* Simplified Stats row (No dues, no drafts, as everything is settled on creation) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {/* 4 Stats Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Total Revenue (Settled)', value: fmt(totalSales), sub: 'Paid in full on checkout', icon: <TrendingUp className="w-5 h-5 text-gray-400" />, vCls: 'text-gray-900' },
-          { label: 'Total Invoices Issued', value: String(totalBillsCount), sub: 'Printed boutique receipts', icon: <Receipt className="w-5 h-5 text-gray-400" />, vCls: 'text-gray-900' },
-        ].map(({ label, value, sub, icon, vCls }) => (
-          <div key={label} className="bg-white rounded-xl border border-gray-200 p-4 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+          { label: 'Total Revenue', value: fmt(totalSales), sub: 'Paid in full at checkout', icon: <TrendingUp className="w-5 h-5 text-gold-600" /> },
+          { label: 'Invoices Issued', value: String(totalBillsCount), sub: 'Printed boutique receipts', icon: <Receipt className="w-5 h-5 text-gold-600" /> },
+          { label: 'Average Bill Value', value: fmt(avgBillValue), sub: 'Average cart per client', icon: <Layers className="w-5 h-5 text-gold-600" /> },
+          { label: 'This Month\'s Sales', value: fmt(thisMonthSales), sub: 'Current calendar billing', icon: <Sparkles className="w-5 h-5 text-gold-600" /> },
+        ].map(({ label, value, sub, icon }) => (
+          <div key={label} className="bg-white rounded-2xl border border-ink-100 p-5 shadow-[0_1px_3px_rgba(26,24,20,0.02),0_8px_24px_-12px_rgba(26,24,20,0.05)]">
             <div className="flex items-start justify-between">
-              <div>
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{label}</p>
-                <p className={`text-2xl font-bold mt-1 ${vCls}`}>{value}</p>
-                <p className="text-xs text-gray-400 mt-0.5">{sub}</p>
+              <div className="space-y-1">
+                <p className="text-[10px] font-bold text-ink-500 uppercase tracking-wider">{label}</p>
+                <p className="text-xl font-bold text-ink-900 tracking-tight font-mono">{value}</p>
+                <p className="text-[10px] text-ink-300 font-medium">{sub}</p>
               </div>
-              <div className="p-2 bg-gray-50 rounded-lg">{icon}</div>
+              <div className="p-2.5 bg-paper rounded-xl border border-ink-100">{icon}</div>
             </div>
           </div>
         ))}
       </div>
 
+      {/* Trend Graph Row */}
+      <Card className="p-6">
+        {loading ? (
+          <div className="space-y-4">
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-32 w-full" />
+          </div>
+        ) : (
+          renderTrendChart()
+        )}
+      </Card>
+
       {/* Invoices List Container */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div className="p-4 border-b border-gray-100">
-          <div className="flex flex-col md:flex-row md:items-center gap-3">
-            {/* Search */}
-            <div className="relative flex-1 min-w-[200px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+      <div className="bg-white rounded-2xl border border-ink-100 overflow-hidden shadow-[0_1px_3px_rgba(26,24,20,0.02),0_8px_24px_-12px_rgba(26,24,20,0.05)]">
+        
+        {/* Filters and search panel */}
+        <div className="p-5 border-b border-ink-100 bg-paper/30">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            {/* Search Input */}
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-300" />
               <input
                 type="text"
-                placeholder="Search order, customer, phone…"
+                placeholder="Search orders by customer name, phone, or ID..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="pr-3 py-2 text-sm rounded-lg border border-gray-200 w-full focus:outline-none focus:border-gray-400 bg-white"
+                className="w-full pr-4 py-2.5 text-xs border border-ink-100 rounded-xl focus:outline-none focus:border-gold-600 bg-white placeholder-ink-300 text-ink-900 font-medium transition-all"
                 style={{ paddingLeft: '2.5rem' }}
               />
             </div>
 
-            {/* Filter controls row */}
-            <div className="flex flex-wrap gap-2 items-center w-full md:w-auto">
-              <div className="flex items-center gap-1.5 w-full sm:w-auto">
-                <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)}
-                  className="w-full sm:w-auto text-sm rounded-lg border border-gray-200 px-2.5 py-1.5 focus:outline-none focus:border-gray-400 bg-white" />
-                <span className="text-gray-400 text-xs">to</span>
-                <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)}
-                  className="w-full sm:w-auto text-sm rounded-lg border border-gray-200 px-2.5 py-1.5 focus:outline-none focus:border-gray-400 bg-white" />
+            {/* Date Picker Group */}
+            <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+              <div className="flex items-center gap-2 bg-white px-3 py-2 border border-ink-100 rounded-xl">
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={e => setStartDate(e.target.value)}
+                  className="text-xs border-0 bg-transparent p-0 text-ink-700 font-medium focus:ring-0 outline-none"
+                />
+                <span className="text-ink-300 text-[10px] uppercase font-bold">to</span>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={e => setEndDate(e.target.value)}
+                  className="text-xs border-0 bg-transparent p-0 text-ink-700 font-medium focus:ring-0 outline-none"
+                />
               </div>
 
-              <button onClick={() => { setSearch(''); setStartDate(''); setEndDate('') }}
-                className="flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600 px-2 py-2 w-auto">
-                <RotateCcw className="w-3.5 h-3.5" /> Reset
-              </button>
+              {(search || startDate || endDate) && (
+                <button
+                  onClick={() => { setSearch(''); setStartDate(''); setEndDate('') }}
+                  className="flex items-center gap-1 text-xs text-ink-500 hover:text-ink-900 px-3 py-2.5 rounded-xl border border-ink-100 hover:border-ink-300 transition-colors"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" /> Reset
+                </button>
+              )}
             </div>
           </div>
         </div>
 
         {/* Desktop Table (Hidden on Mobile) */}
         <div className="hidden md:block overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-xs">
             <thead>
-              <tr className="border-b border-gray-100 bg-gray-50 text-left">
-                <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Order ID</th>
-                <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Customer</th>
-                <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
-                <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">Payment Mode</th>
-                <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Total Amount</th>
-                <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">Actions</th>
+              <tr className="border-b border-ink-100 bg-paper/50 text-left">
+                <th className="px-5 py-4 text-[10px] font-bold text-ink-500 uppercase tracking-wider">Order ID</th>
+                <th className="px-5 py-4 text-[10px] font-bold text-ink-500 uppercase tracking-wider">Customer Client</th>
+                <th className="px-5 py-4 text-[10px] font-bold text-ink-500 uppercase tracking-wider">Checkout Date</th>
+                <th className="px-5 py-4 text-[10px] font-bold text-ink-500 uppercase tracking-wider text-center">Payment Mode</th>
+                <th className="px-5 py-4 text-[10px] font-bold text-ink-500 uppercase tracking-wider text-right">Total Amount</th>
+                <th className="px-5 py-4 text-[10px] font-bold text-ink-500 uppercase tracking-wider text-center">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-ink-100">
               {loading ? (
-                <tr><td colSpan={6} className="text-center py-10 text-gray-400 text-sm">Loading…</td></tr>
+                <tr>
+                  <td colSpan={6} className="px-5 py-8">
+                    <div className="space-y-2">
+                      <Skeleton className="h-5 w-full" />
+                      <Skeleton className="h-5 w-full" />
+                      <Skeleton className="h-5 w-full" />
+                    </div>
+                  </td>
+                </tr>
               ) : invoices.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-12">
-                    <div className="flex flex-col items-center gap-2 text-gray-400">
-                      <Receipt className="w-8 h-8" />
-                      <p className="text-sm font-medium">No invoices yet</p>
-                      <p className="text-xs">Create your first bill to get started</p>
-                      <Link href="/invoices/new" className="mt-2 text-xs bg-gray-900 text-white px-3 py-1.5 rounded-lg hover:bg-gray-700 transition-colors">
-                        Create Bill
+                  <td colSpan={6} className="text-center py-16">
+                    <div className="flex flex-col items-center gap-2 text-ink-300">
+                      <Receipt className="w-8 h-8 text-ink-100" />
+                      <p className="text-sm font-semibold text-ink-900">No boutique invoices found</p>
+                      <p className="text-xs">Issue your first bill to record customer orders</p>
+                      <Link href="/invoices/new" className="mt-3 text-xs bg-ink-900 text-white px-4 py-2 rounded-xl hover:bg-ink-700 transition-colors font-bold shadow-xs">
+                        Create Receipt
                       </Link>
                     </div>
                   </td>
                 </tr>
               ) : (
                 invoices.map(inv => (
-                  <tr key={inv.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3 font-mono text-xs font-bold text-gray-900">
-                      {inv.orderId || <span className="text-gray-400 font-sans font-normal">Draft</span>}
+                  <tr key={inv.id} className="hover:bg-paper/20 transition-all group">
+                    <td className="px-5 py-4 font-mono text-[11px] font-bold text-ink-900">
+                      {inv.orderId || <span className="text-ink-300 font-sans font-normal">Draft</span>}
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="font-medium text-gray-900">{inv.customer.name}</div>
-                      <div className="text-xs text-gray-400">{inv.customer.phone}</div>
+                    <td className="px-5 py-4">
+                      <div className="font-semibold text-ink-900 text-xs">{inv.customer.name}</div>
+                      <div className="text-[10px] text-ink-500 font-mono mt-0.5">+91 {inv.customer.phone}</div>
                     </td>
-                    <td className="px-4 py-3 text-xs text-gray-500">
-                      {new Date(inv.invoiceDate).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' })}
+                    <td className="px-5 py-4 text-[10px] text-ink-700 font-medium">
+                      {new Date(inv.invoiceDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                     </td>
-                    <td className="px-4 py-3 text-center text-xs font-medium text-gray-600">
-                      <span className="bg-gray-100 border border-gray-200 px-2 py-0.5 rounded-md">
+                    <td className="px-5 py-4 text-center">
+                      <span className="bg-gold-100/50 border border-gold-600/10 text-gold-600 font-semibold px-2.5 py-0.5 rounded-md text-[10px] uppercase tracking-wide">
                         {inv.paymentMode}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-right font-bold text-gray-900">{fmt(inv.totalAmount)}</td>
-                    <td className="px-4 py-3 text-center">
+                    <td className="px-5 py-4 text-right font-bold text-ink-900 font-mono tabular-nums text-xs">
+                      {fmt(inv.totalAmount)}
+                    </td>
+                    <td className="px-5 py-4 text-center">
                       <Link href={`/invoices/${inv.id}`}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-100 text-xs transition-colors" title="View">
-                        <Eye className="w-4 h-4" /> View Receipt
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-ink-100 hover:border-ink-300 hover:bg-white text-ink-700 hover:text-ink-900 text-[10px] font-bold transition-all shadow-2xs"
+                      >
+                        Receipt <ArrowRight className="w-3 h-3 text-gold-600" />
                       </Link>
                     </td>
                   </tr>
@@ -217,51 +370,52 @@ export default function Dashboard() {
         </div>
 
         {/* Mobile List (Hidden on Desktop) */}
-        <div className="md:hidden divide-y divide-gray-100">
+        <div className="md:hidden divide-y divide-ink-100">
           {loading ? (
-            <div className="text-center py-8 text-gray-400 text-xs">Loading…</div>
+            <div className="p-4 space-y-3">
+              <Skeleton className="h-10 w-full animate-pulse" />
+              <Skeleton className="h-10 w-full animate-pulse" />
+            </div>
           ) : invoices.length === 0 ? (
-            <div className="text-center py-10">
-              <p className="text-sm font-medium text-gray-500">No invoices yet</p>
-              <Link href="/invoices/new" className="mt-2 inline-block text-xs bg-gray-900 text-white px-3 py-1.5 rounded-lg">
+            <div className="text-center py-12 px-4">
+              <p className="text-xs text-ink-300">No invoices yet.</p>
+              <Link href="/invoices/new" className="mt-2 inline-block text-xs bg-ink-900 text-white px-4 py-2 rounded-xl">
                 Create Bill
               </Link>
             </div>
           ) : (
             invoices.map(inv => (
-              <div key={inv.id} className="p-4 space-y-3">
+              <div key={inv.id} className="p-4 space-y-3 bg-white hover:bg-paper/10 transition-colors">
                 <div className="flex justify-between items-start">
                   <div>
-                    <span className="font-mono text-xs font-bold text-gray-900">
+                    <span className="font-mono text-[10px] font-bold text-ink-900">
                       {inv.orderId || 'Draft'}
                     </span>
-                    <p className="text-sm font-semibold text-gray-900 mt-1">{inv.customer.name}</p>
-                    <p className="text-xs text-gray-400">{inv.customer.phone}</p>
+                    <p className="text-xs font-bold text-ink-900 mt-1">{inv.customer.name}</p>
+                    <p className="text-[10px] text-ink-500 font-mono mt-0.5">+91 {inv.customer.phone}</p>
                   </div>
-                  <span className="text-[10px] bg-gray-100 border border-gray-200 px-2 py-0.5 rounded-md text-gray-600 font-medium">
+                  <span className="text-[9px] bg-gold-100/50 border border-gold-600/10 text-gold-600 px-2 py-0.5 rounded-md font-bold tracking-wide uppercase">
                     {inv.paymentMode}
                   </span>
                 </div>
                 
-                <div className="flex justify-between text-xs text-gray-500 bg-gray-50 p-2.5 rounded-lg">
+                <div className="flex justify-between text-[10px] text-ink-500 bg-paper p-2.5 rounded-xl border border-ink-100/50">
                   <div>
-                    <span className="block text-[9px] text-gray-400 uppercase tracking-wide">Date</span>
-                    <span className="font-medium text-gray-700">
-                      {new Date(inv.invoiceDate).toLocaleDateString('en-IN', { day:'2-digit', month:'short' })}
+                    <span className="block text-[8px] text-ink-300 uppercase tracking-wider font-semibold">Date</span>
+                    <span className="font-semibold text-ink-700">
+                      {new Date(inv.invoiceDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
                     </span>
                   </div>
                   <div className="text-right">
-                    <span className="block text-[9px] text-gray-400 uppercase tracking-wide">Total Billed</span>
-                    <span className="font-bold text-gray-900">{fmt(inv.totalAmount)}</span>
+                    <span className="block text-[8px] text-ink-300 uppercase tracking-wider font-semibold">Total Amount</span>
+                    <span className="font-bold text-ink-900 font-mono tabular-nums">{fmt(inv.totalAmount)}</span>
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-2 pt-1">
-                  <Link href={`/invoices/${inv.id}`}
-                    className="w-full inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 text-xs font-medium bg-white hover:bg-gray-50 transition-colors">
-                    <Eye className="w-3.5 h-3.5" /> View Receipt
-                  </Link>
-                </div>
+                <Link href={`/invoices/${inv.id}`}
+                  className="w-full inline-flex items-center justify-center gap-1 px-3 py-2 rounded-xl border border-ink-100 text-ink-700 text-xs font-bold bg-white active:bg-paper transition-all">
+                  <Eye className="w-3.5 h-3.5 text-gold-600" /> View Receipt
+                </Link>
               </div>
             ))
           )}
