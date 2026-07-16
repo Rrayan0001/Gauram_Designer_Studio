@@ -134,7 +134,8 @@ export default function Dashboard() {
                   placeholder="Search order, customer, phone…"
                   value={search}
                   onChange={e => setSearch(e.target.value)}
-                  className="pl-9 pr-3 py-2 text-sm rounded-lg border border-gray-200 w-full focus:outline-none focus:border-gray-400 bg-white"
+                  className="pr-3 py-2 text-sm rounded-lg border border-gray-200 w-full focus:outline-none focus:border-gray-400 bg-white"
+                  style={{ paddingLeft: '2.5rem' }}
                 />
               </div>
 
