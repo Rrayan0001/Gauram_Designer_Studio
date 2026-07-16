@@ -38,7 +38,6 @@ input, select, textarea {
   font-size: 14px;
   outline: none;
   transition: border-color 0.15s;
-  width: 100%;
   box-sizing: border-box;
 }
 input:focus, select:focus, textarea:focus {
