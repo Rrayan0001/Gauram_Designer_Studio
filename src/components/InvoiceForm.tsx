@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Trash2, ArrowLeft, Save, ShieldAlert, Sparkles, Check, DollarSign } from 'lucide-react'
+import { Plus, Trash2, ArrowLeft, Sparkles, Check } from 'lucide-react'
 import Link from 'next/link'
 
 interface Customer { id: string; name: string; phone: string; address?: string }
@@ -32,7 +32,6 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
       : new Date().toISOString().split('T')[0]
   )
   const [paymentMode, setPaymentMode] = useState(initialInvoice?.paymentMode || 'UPI')
-  const [amountPaid, setAmountPaid] = useState(initialInvoice?.amountPaid || 0)
 
   // Overall discount state (calculated from initial invoice values if editing)
   const [overallDiscount, setOverallDiscount] = useState<number>(() => {
@@ -56,7 +55,6 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
     })) || [{ description: '', category: "Women's Wear", hsnSacCode: 'HSN 6204', quantity: 1, rate: 0, discount: 0, gstRate: 12, amount: 0 }]
   )
   const [submitting, setSubmitting] = useState(false)
-  const [showFinalizeConfirm, setShowFinalizeConfirm] = useState(false)
 
   useEffect(() => {
     fetch('/api/business').then(r => r.json()).then(d => { if (d && !d.error) setSettings(d) })
@@ -99,9 +97,8 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
   
   // Grand total
   const totalAmount = taxableAmount + cgstAmount + sgstAmount
-  const pendingAmount = Math.max(0, totalAmount - amountPaid)
 
-  const handleSubmit = async (finalize: boolean) => {
+  const handleSubmit = async () => {
     if (!customerName || !customerPhone) return alert('Please fill Customer Name and Phone.')
     if (items.some(i => !i.description || i.rate <= 0)) return alert('Please fill all item descriptions and rates.')
     setSubmitting(true)
@@ -125,11 +122,11 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
       cgstAmount,
       sgstAmount,
       totalAmount,
-      amountPaid,
+      amountPaid: totalAmount, // Every invoice is paid in full at creation
       paymentMode,
       items: payloadItems,
-      isFinalized: finalize,
-      isFinalizing: finalize
+      isFinalized: true,       // Finalized instantly
+      isFinalizing: true
     }
 
     try {
@@ -138,7 +135,7 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
       if (res.ok) { const saved = await res.json(); router.push(`/invoices/${saved.id}`) }
       else { const e = await res.json(); alert(`Error: ${e.error || 'Failed'}`) }
     } catch { alert('Failed to submit. Try again.') }
-    finally { setSubmitting(false); setShowFinalizeConfirm(false) }
+    finally { setSubmitting(false) }
   }
 
   return (
@@ -150,10 +147,10 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
         </Link>
         <div>
           <h2 className="text-xl font-bold text-gray-900">
-            {isEdit ? 'Edit Draft Invoice' : 'Create New Bill'}
+            {isEdit ? 'Edit Invoice' : 'Create New Bill'}
           </h2>
           <p className="text-xs text-gray-500 mt-0.5">
-            {isEdit ? 'Modify draft before finalising' : 'Add garments, custom stitching services, and rentals'}
+            Add garments, custom stitching services, and select payment mode
           </p>
         </div>
       </div>
@@ -382,49 +379,33 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
               />
             </div>
 
+            {/* Payment Mode (Important as everything is paid on creation) */}
+            <div>
+              <label className={labelCls}>Payment Mode</label>
+              <select value={paymentMode} onChange={e => setPaymentMode(e.target.value)}
+                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-gray-400">
+                <option value="UPI">UPI (GPay / PhonePe / Paytm)</option>
+                <option value="Cash">Cash</option>
+                <option value="Card">Credit / Debit Card</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+              </select>
+            </div>
+
             {/* Actions */}
-            <div className="space-y-3 pt-2">
-              <button type="button" disabled={submitting} onClick={() => handleSubmit(false)}
-                className="w-full flex items-center justify-center gap-2 border border-gray-300 text-gray-700 hover:bg-gray-50 py-2.5 rounded-xl text-sm font-medium transition-colors disabled:opacity-50">
-                <Save className="w-4 h-4 text-gray-400" />
-                Save Draft
-              </button>
-              <button type="button" disabled={submitting} onClick={() => setShowFinalizeConfirm(true)}
-                className="w-full flex items-center justify-center gap-2 bg-gray-900 hover:bg-gray-700 text-white py-2.5 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50">
+            <div className="pt-2">
+              <button
+                type="button"
+                disabled={submitting}
+                onClick={handleSubmit}
+                className="w-full flex items-center justify-center gap-2 bg-gray-900 hover:bg-gray-700 text-white py-2.5 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50"
+              >
                 <Sparkles className="w-4 h-4" />
-                Finalize & Issue Bill
+                {submitting ? 'Generating...' : 'Generate & Print Invoice'}
               </button>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Finalize Confirmation Modal */}
-      {showFinalizeConfirm && (
-        <div className="fixed inset-0 bg-black/25 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white border border-gray-200 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden">
-            <div className="p-6 text-center space-y-4">
-              <div className="w-12 h-12 rounded-full bg-amber-50 border border-amber-200 text-amber-500 flex items-center justify-center mx-auto">
-                <ShieldAlert className="w-6 h-6" />
-              </div>
-              <h4 className="text-lg font-bold text-gray-900">Lock and Finalise Bill?</h4>
-              <p className="text-sm text-gray-500 leading-relaxed">
-                This will assign a sequential GST Invoice Number ({settings?.invoicePrefix || 'GDS/2026/'}XXXX) and lock the line items. Follow-up payments can still be recorded.
-              </p>
-              <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => setShowFinalizeConfirm(false)}
-                  className="flex-1 border border-gray-200 text-gray-600 hover:bg-gray-50 py-2.5 rounded-xl text-sm font-medium transition-colors">
-                  Go Back
-                </button>
-                <button type="button" disabled={submitting} onClick={() => handleSubmit(true)}
-                  className="flex-1 bg-gray-900 hover:bg-gray-700 text-white py-2.5 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50">
-                  {submitting ? 'Locking…' : 'Yes, Lock & Finalise'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
