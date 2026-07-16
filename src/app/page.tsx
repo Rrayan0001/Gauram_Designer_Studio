@@ -179,8 +179,8 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Table */}
-          <div className="overflow-x-auto">
+          {/* Desktop Table (Hidden on Mobile) */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50 text-left">
@@ -256,6 +256,73 @@ export default function Dashboard() {
                 )}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile List (Hidden on Desktop) */}
+          <div className="md:hidden divide-y divide-gray-100">
+            {loading ? (
+              <div className="text-center py-8 text-gray-400 text-xs">Loading…</div>
+            ) : invoices.length === 0 ? (
+              <div className="text-center py-10">
+                <p className="text-sm font-medium text-gray-500">No invoices yet</p>
+                <Link href="/invoices/new" className="mt-2 inline-block text-xs bg-gray-900 text-white px-3 py-1.5 rounded-lg">
+                  Create Bill
+                </Link>
+              </div>
+            ) : (
+              invoices.map(inv => (
+                <div key={inv.id} className="p-4 space-y-3">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <span className="font-mono text-xs font-bold text-gray-900">
+                        {inv.orderId || 'Draft'}
+                      </span>
+                      <p className="text-sm font-semibold text-gray-900 mt-1">{inv.customer.name}</p>
+                      <p className="text-xs text-gray-400">{inv.customer.phone}</p>
+                    </div>
+                    <div>{statusBadge(inv.status)}</div>
+                  </div>
+                  
+                  <div className="flex justify-between text-xs text-gray-500 bg-gray-50 p-2.5 rounded-lg">
+                    <div>
+                      <span className="block text-[9px] text-gray-400 uppercase tracking-wide">Date</span>
+                      <span className="font-medium text-gray-700">
+                        {new Date(inv.invoiceDate).toLocaleDateString('en-IN', { day:'2-digit', month:'short' })}
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <span className="block text-[9px] text-gray-400 uppercase tracking-wide">Total</span>
+                      <span className="font-bold text-gray-900">{fmt(inv.totalAmount)}</span>
+                    </div>
+                    {inv.pendingAmount > 0 && (
+                      <div className="text-right">
+                        <span className="block text-[9px] text-gray-400 uppercase tracking-wide">Due</span>
+                        <span className="font-bold text-red-600">{fmt(inv.pendingAmount)}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex justify-end gap-2 pt-1">
+                    <Link href={`/invoices/${inv.id}`}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 text-xs font-medium bg-white hover:bg-gray-50 transition-colors">
+                      <Eye className="w-3.5 h-3.5" /> View
+                    </Link>
+                    {inv.status === 'draft' && (
+                      <Link href={`/invoices/${inv.id}/edit`}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-amber-200 text-amber-600 text-xs font-medium bg-amber-50 hover:bg-amber-100 transition-colors">
+                        <Edit className="w-3.5 h-3.5" /> Edit
+                      </Link>
+                    )}
+                    {inv.status !== 'draft' && inv.pendingAmount > 0 && (
+                      <button onClick={() => openPayModal(inv)}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-50 text-green-700 border border-green-200 text-xs font-medium hover:bg-green-100 transition-colors">
+                        <PlusCircle className="w-3.5 h-3.5" /> Record Payment
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
 

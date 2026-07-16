@@ -49,8 +49,8 @@ export default function CustomersPage() {
           </div>
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
+        {/* Desktop Table (Hidden on Mobile) */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50 text-left">
@@ -106,6 +106,56 @@ export default function CustomersPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Mobile List (Hidden on Desktop) */}
+        <div className="md:hidden divide-y divide-gray-100 animate-fade-in">
+          {loading ? (
+            <div className="text-center py-6 text-gray-400 text-xs">Loading…</div>
+          ) : customers.length === 0 ? (
+            <div className="text-center py-10 text-gray-400 text-xs">No customers yet</div>
+          ) : (
+            customers.map(c => (
+              <div key={c.id} className="p-4 space-y-3">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-900">{c.name}</h4>
+                    <p className="text-xs text-gray-400 mt-0.5">+91 {c.phone}</p>
+                  </div>
+                  <div>
+                    {c.totalPending > 0
+                      ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-medium bg-red-50 text-red-600 border border-red-200"><AlertTriangle className="w-2.5 h-2.5" /> Due</span>
+                      : <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-medium bg-green-50 text-green-600 border border-green-200">Settled</span>}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 text-xs bg-gray-50 p-2 rounded-lg text-center">
+                  <div>
+                    <span className="block text-[9px] text-gray-400 uppercase tracking-wide">Orders</span>
+                    <span className="font-semibold text-gray-700">{c.orderCount}</span>
+                  </div>
+                  <div>
+                    <span className="block text-[9px] text-gray-400 uppercase tracking-wide">Billed</span>
+                    <span className="font-semibold text-gray-700">{fmt(c.totalBilled)}</span>
+                  </div>
+                  <div>
+                    <span className="block text-[9px] text-gray-400 uppercase tracking-wide">Due</span>
+                    <span className={`font-semibold ${c.totalPending > 0 ? 'text-red-600' : 'text-gray-400'}`}>
+                      {c.totalPending > 0 ? fmt(c.totalPending) : '—'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-1">
+                  <Link href={`/customers/${c.id}`}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 text-xs font-medium bg-white hover:bg-gray-50 transition-colors w-full sm:w-auto justify-center">
+                    <Eye className="w-3.5 h-3.5" /> View Profile &amp; History
+                  </Link>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
       </div>
     </div>
   )
