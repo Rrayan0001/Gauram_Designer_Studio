@@ -139,9 +139,9 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
         {/* Invoices table — takes 3 cols */}
         <div className="xl:col-span-3 bg-white rounded-xl border border-gray-200 overflow-hidden">
-          {/* Filters bar */}
-          <div className="p-4 border-b border-gray-100 space-y-3">
-            <div className="flex gap-3 flex-wrap items-center">
+          <div className="p-4 border-b border-gray-100">
+            <div className="flex flex-col md:flex-row md:items-center gap-3">
+              {/* Search */}
               <div className="relative flex-1 min-w-[200px]">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
@@ -149,33 +149,43 @@ export default function Dashboard() {
                   placeholder="Search order, customer, phone…"
                   value={search}
                   onChange={e => setSearch(e.target.value)}
-                  className="pl-9 pr-3 py-2 text-sm rounded-lg border border-gray-200 w-full focus:outline-none focus:border-gray-400"
+                  className="pl-9 pr-3 py-2 text-sm rounded-lg border border-gray-200 w-full focus:outline-none focus:border-gray-400 bg-white"
                 />
               </div>
-              <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
-                className="text-sm rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:border-gray-400 bg-white">
-                <option value="">All Status</option>
-                <option value="paid">Paid</option>
-                <option value="partial">Partial</option>
-                <option value="pending">Pending</option>
-                <option value="draft">Draft</option>
-              </select>
-              <select value={categoryFilter} onChange={e => setCategoryFilter(e.target.value)}
-                className="text-sm rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:border-gray-400 bg-white">
-                <option value="">All Categories</option>
-                <option value="Women's Wear">Women's Wear</option>
-                <option value="Men's Wear">Men's Wear</option>
-                <option value="Kids Wear">Kids Wear</option>
-                <option value="Rental">Rental</option>
-              </select>
-              <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)}
-                className="text-sm rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:border-gray-400 bg-white" />
-              <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)}
-                className="text-sm rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:border-gray-400 bg-white" />
-              <button onClick={() => { setSearch(''); setStatusFilter(''); setCategoryFilter(''); setStartDate(''); setEndDate('') }}
-                className="flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600 px-2 py-2">
-                <RotateCcw className="w-3.5 h-3.5" /> Reset
-              </button>
+
+              {/* Filter controls row */}
+              <div className="flex flex-wrap gap-2 items-center w-full md:w-auto">
+                <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
+                  className="w-full sm:w-auto min-w-[120px] text-sm rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:border-gray-400 bg-white">
+                  <option value="">All Status</option>
+                  <option value="paid">Paid</option>
+                  <option value="partial">Partial</option>
+                  <option value="pending">Pending</option>
+                  <option value="draft">Draft</option>
+                </select>
+
+                <select value={categoryFilter} onChange={e => setCategoryFilter(e.target.value)}
+                  className="w-full sm:w-auto min-w-[140px] text-sm rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:border-gray-400 bg-white">
+                  <option value="">All Categories</option>
+                  <option value="Women's Wear">Women's Wear</option>
+                  <option value="Men's Wear">Men's Wear</option>
+                  <option value="Kids Wear">Kids Wear</option>
+                  <option value="Rental">Rental</option>
+                </select>
+
+                <div className="flex items-center gap-1.5 w-full sm:w-auto">
+                  <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)}
+                    className="w-full sm:w-auto text-sm rounded-lg border border-gray-200 px-2.5 py-1.5 focus:outline-none focus:border-gray-400 bg-white" />
+                  <span className="text-gray-400 text-xs">to</span>
+                  <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)}
+                    className="w-full sm:w-auto text-sm rounded-lg border border-gray-200 px-2.5 py-1.5 focus:outline-none focus:border-gray-400 bg-white" />
+                </div>
+
+                <button onClick={() => { setSearch(''); setStatusFilter(''); setCategoryFilter(''); setStartDate(''); setEndDate('') }}
+                  className="flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600 px-2 py-2 w-auto">
+                  <RotateCcw className="w-3.5 h-3.5" /> Reset
+                </button>
+              </div>
             </div>
           </div>
 
