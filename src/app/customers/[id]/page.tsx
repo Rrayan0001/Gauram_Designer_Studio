@@ -2,8 +2,9 @@
 
 import { useState, useEffect, use } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, FileText, Sparkles, Check, ChevronRight, Phone, PlusCircle } from 'lucide-react'
-import { Avatar, Badge, Button, Skeleton } from '@/components/ui/Kit'
+import { useRouter } from 'next/navigation'
+import { ArrowLeft, FileText, Sparkles, Check, ChevronRight, Phone, PlusCircle, Edit, Trash2 } from 'lucide-react'
+import { Avatar, Badge, Button, Skeleton, Modal, ConfirmDialog, Field, Input } from '@/components/ui/Kit'
 import { useToast } from '@/components/ui/Toast'
 import { fmtINR, fmtDateIN, fmtPhone } from '@/lib/format'
 
@@ -38,12 +39,26 @@ interface CustomerDetail {
 export default function CustomerDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const toast = useToast()
+  const router = useRouter()
+
   const [customer, setCustomer] = useState<CustomerDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [notes, setNotes] = useState('')
   const [savingNotes, setSavingNotes] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(false)
+
+  // Edit states
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editName, setEditName] = useState('')
+  const [editPhone, setEditPhone] = useState('')
+  const [editAddress, setEditAddress] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [formError, setFormError] = useState('')
+
+  // Delete states
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     fetch(`/api/customers/${id}`)
@@ -54,10 +69,64 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
       .then((data) => {
         setCustomer(data)
         setNotes(data.notes || '')
+        setEditName(data.name)
+        setEditPhone(data.phone)
+        setEditAddress(data.address || '')
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false))
   }, [id])
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editName.trim() || !editPhone.trim()) {
+      setFormError('Name and phone are required')
+      return
+    }
+    setFormError('')
+    setSaving(true)
+    try {
+      const res = await fetch(`/api/customers/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: editName, phone: editPhone, address: editAddress }),
+      })
+      if (res.ok) {
+        const updated = await res.json()
+        setCustomer((prev) => prev ? { ...prev, ...updated } : null)
+        setShowEditModal(false)
+        toast.success('Client profile updated')
+      } else {
+        const err = await res.json().catch(() => ({}))
+        toast.error(err.error || 'Could not update client')
+      }
+    } catch {
+      toast.error('Could not update client')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleDeleteConfirm = async () => {
+    setDeleting(true)
+    try {
+      const res = await fetch(`/api/customers/${id}`, {
+        method: 'DELETE',
+      })
+      if (res.ok) {
+        toast.success('Client deleted')
+        router.push('/customers')
+      } else {
+        const err = await res.json().catch(() => ({}))
+        toast.error(err.error || 'Could not delete customer')
+      }
+    } catch {
+      toast.error('Could not delete customer')
+    } finally {
+      setDeleting(false)
+      setShowDeleteConfirm(false)
+    }
+  }
 
   const handleSaveNotes = async () => {
     setSavingNotes(true)
@@ -150,6 +219,24 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
           >
             <PlusCircle className="w-4 h-4" /> New bill
           </Link>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setShowEditModal(true)}
+            className="min-h-[44px]"
+          >
+            <Edit className="w-4 h-4 text-ink-700" /> Edit
+          </Button>
+          <Button
+            type="button"
+            variant="danger"
+            size="sm"
+            onClick={() => setShowDeleteConfirm(true)}
+            className="min-h-[44px]"
+          >
+            <Trash2 className="w-4 h-4 text-rose-600" /> Delete
+          </Button>
         </div>
       </div>
 
@@ -284,6 +371,65 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
           </Button>
         </div>
       </div>
+
+      <Modal open={showEditModal} onClose={() => setShowEditModal(false)} title="Edit client profile" sheet>
+        <form onSubmit={handleEditSubmit} className="space-y-4">
+          <Field label="Full name" error={formError && !editName ? formError : undefined}>
+            <Input
+              type="text"
+              autoComplete="name"
+              required
+              placeholder="e.g. Priyal Patel"
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+            />
+          </Field>
+          <Field label="Phone number" error={formError && !editPhone ? formError : undefined}>
+            <Input
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              required
+              placeholder="e.g. 9900469746"
+              value={editPhone}
+              onChange={(e) => setEditPhone(e.target.value)}
+            />
+          </Field>
+          <Field label="Address" hint="Optional">
+            <Input
+              type="text"
+              autoComplete="street-address"
+              placeholder="Optional address"
+              value={editAddress}
+              onChange={(e) => setEditAddress(e.target.value)}
+            />
+          </Field>
+          {formError && editName && editPhone && (
+            <p className="text-[11px] text-rose-600 font-medium">{formError}</p>
+          )}
+          <Button type="submit" variant="ink" className="w-full" loading={saving}>
+            Save changes
+          </Button>
+        </form>
+      </Modal>
+
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={handleDeleteConfirm}
+        title="Delete customer"
+        description={
+          <div className="space-y-2 text-ink-600 font-medium text-sm leading-relaxed">
+            <p>Are you sure you want to delete <strong>{customer.name}</strong>?</p>
+            <p className="text-rose-600 font-semibold bg-rose-50 border border-rose-100 rounded-xl p-3 text-xs leading-normal mt-2">
+              Warning: This will permanently delete this client and all their {customer.invoices.length} receipt(s) / billing record(s). This action cannot be undone.
+            </p>
+          </div>
+        }
+        confirmLabel="Delete customer"
+        danger
+        loading={deleting}
+      />
     </div>
   )
 }
