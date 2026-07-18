@@ -83,7 +83,7 @@ export default function Sidebar() {
       {/* Mobile header */}
       <header className="no-print md:hidden bg-white border-b border-ink-100 px-4 pt-safe pb-3 flex items-center justify-between sticky top-0 z-40 select-none">
         <Link href="/" className="flex items-center gap-2">
-          <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-gold-600/20 ring-1 ring-gold-100 p-0.5">
+          <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-gold-600/20 ring-1 ring-gold-100 p-0.5 bg-black">
             <Image src="/logo.png" alt="Gauram Logo" fill className="object-contain" />
           </div>
           <div>
@@ -131,7 +131,7 @@ export default function Sidebar() {
           >
             <div className="flex items-center justify-between pb-4 border-b border-ink-100 mb-4">
               <div className="flex items-center gap-2">
-                <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-gold-600/20 ring-1 ring-gold-100 p-0.5">
+                <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-gold-600/20 ring-1 ring-gold-100 p-0.5 bg-black">
                   <Image src="/logo.png" alt="Gauram Logo" fill className="object-contain" />
                 </div>
                 <div>
@@ -193,7 +193,7 @@ export default function Sidebar() {
             collapsed && 'justify-center'
           )}
         >
-          <div className="relative flex-shrink-0 w-9 h-9 rounded-lg overflow-hidden border border-gold-600/25 ring-1 ring-gold-100 p-0.5 bg-paper">
+          <div className="relative flex-shrink-0 w-9 h-9 rounded-lg overflow-hidden border border-gold-600/25 ring-1 ring-gold-100 p-0.5 bg-black">
             <Image src="/logo.png" alt="Gauram Logo" fill className="object-contain" />
           </div>
           {!collapsed && (
