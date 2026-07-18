@@ -221,7 +221,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none opacity-[0.03] p-4">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/logo.png"
+            src="/logo-v2.png"
             alt=""
             className="w-72 h-72 sm:w-96 sm:h-96 max-w-[16rem] max-h-[16rem] sm:max-w-none object-contain aspect-square"
           />
@@ -232,7 +232,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
             <div className="flex items-center gap-4">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/logo.png"
+                src="/logo-v2.png"
                 alt="Gauram Logo"
                 className="w-12 h-12 sm:w-16 sm:h-16 rounded-full object-contain border border-gold-600/20 bg-white p-1"
                 onError={(e) => {

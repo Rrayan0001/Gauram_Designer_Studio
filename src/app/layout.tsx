@@ -24,8 +24,8 @@ export const metadata: Metadata = {
   title: "Gauram Designer Studio — Billing",
   description: "Boutique Billing & Invoice Management System",
   icons: {
-    icon: "/logo.png",
-    apple: "/logo.png",
+    icon: "/logo-v2.png",
+    apple: "/logo-v2.png",
   },
 };
 

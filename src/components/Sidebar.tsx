@@ -84,7 +84,7 @@ export default function Sidebar() {
       <header className="no-print md:hidden bg-white border-b border-ink-100 px-4 pt-safe pb-3 flex items-center justify-between sticky top-0 z-40 select-none">
         <Link href="/" className="flex items-center gap-2">
           <div className="relative w-12 h-12 rounded-xl overflow-hidden border border-gold-600/20 ring-1 ring-gold-100">
-            <Image src="/logo.png" alt="Gauram Logo" fill className="object-contain" />
+            <Image src="/logo-v2.png" alt="Gauram Logo" fill className="object-contain" />
           </div>
           <div>
             <span className="font-serif font-bold text-sm text-ink-900 block leading-none">
@@ -132,7 +132,7 @@ export default function Sidebar() {
             <div className="flex items-center justify-between pb-4 border-b border-ink-100 mb-4">
               <div className="flex items-center gap-2">
                 <div className="relative w-12 h-12 rounded-xl overflow-hidden border border-gold-600/20 ring-1 ring-gold-100">
-                  <Image src="/logo.png" alt="Gauram Logo" fill className="object-contain" />
+                  <Image src="/logo-v2.png" alt="Gauram Logo" fill className="object-contain" />
                 </div>
                 <div>
                   <span className="font-serif font-bold text-sm text-ink-900 block leading-none">Gauram</span>
@@ -194,7 +194,7 @@ export default function Sidebar() {
           )}
         >
           <div className="relative flex-shrink-0 w-14 h-14 rounded-xl overflow-hidden border border-gold-600/25 ring-1 ring-gold-100">
-            <Image src="/logo.png" alt="Gauram Logo" fill className="object-contain" />
+            <Image src="/logo-v2.png" alt="Gauram Logo" fill className="object-contain" />
           </div>
           {!collapsed && (
             <div className="overflow-hidden">
