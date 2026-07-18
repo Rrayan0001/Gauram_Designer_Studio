@@ -171,8 +171,9 @@ export default function Sidebar() {
               })}
             </nav>
 
-            <div className="border-t border-ink-100 pt-4 text-center text-[11px] text-ink-400">
+            <div className="border-t border-ink-100 pt-4 text-center text-[11px] text-ink-400 space-y-1">
               <p>© 2026 Gauram Studio</p>
+              <p>Developed by <a href="https://kreosoftwares.in" target="_blank" rel="noopener noreferrer" className="text-gold-600 hover:underline font-semibold">Kreo Software</a></p>
             </div>
           </div>
         </div>

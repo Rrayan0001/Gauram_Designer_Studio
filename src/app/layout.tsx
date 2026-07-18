@@ -39,10 +39,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="h-full flex flex-col md:flex-row antialiased font-sans" suppressHydrationWarning>
         <ToastProvider>
           <Sidebar />
-          <main id="main" tabIndex={-1} className="flex-1 overflow-auto bg-paper min-h-screen outline-none">
-            <div className="p-4 md:p-8 pb-24 md:pb-8 print-container">
+          <main id="main" tabIndex={-1} className="flex-grow overflow-auto bg-paper min-h-screen outline-none flex flex-col">
+            <div className="p-4 md:p-8 pb-24 md:pb-8 print-container flex-1">
               {children}
             </div>
+            <footer className="no-print text-center text-[11px] text-ink-400 py-4 border-t border-ink-100 select-none bg-white/20">
+              <p>Developed by <a href="https://kreosoftwares.in" target="_blank" rel="noopener noreferrer" className="text-gold-600 hover:underline font-semibold">Kreo Software</a></p>
+            </footer>
           </main>
         </ToastProvider>
       </body>
