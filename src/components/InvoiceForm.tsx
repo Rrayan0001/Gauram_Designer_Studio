@@ -84,7 +84,8 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
   const [paymentMode, setPaymentMode] = useState(initialInvoice?.paymentMode || 'UPI')
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  const [overallDiscount, setOverallDiscount] = useState<number>(() => {
+  const [discountType, setDiscountType] = useState<'fixed' | 'percent'>('fixed')
+  const [discountValue, setDiscountValue] = useState<number>(() => {
     if (!initialInvoice?.cgstAmount || !initialInvoice?.subtotal) return 0
     const taxableVal = initialInvoice.cgstAmount / 0.06
     const diff = initialInvoice.subtotal - taxableVal
@@ -133,7 +134,15 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
         if (draft.customerId) setCustomerId(draft.customerId)
         if (draft.paymentMode) setPaymentMode(draft.paymentMode)
         if (draft.invoiceDate) setInvoiceDate(draft.invoiceDate)
-        if (typeof draft.overallDiscount === 'number') setOverallDiscount(draft.overallDiscount)
+        if (typeof draft.discountType === 'string' && (draft.discountType === 'fixed' || draft.discountType === 'percent')) {
+          setDiscountType(draft.discountType)
+        }
+        if (typeof draft.discountValue === 'number') {
+          setDiscountValue(draft.discountValue)
+        } else if (typeof draft.overallDiscount === 'number') {
+          setDiscountValue(draft.overallDiscount)
+          setDiscountType('fixed')
+        }
         if (Array.isArray(draft.items) && draft.items.length) setItems(draft.items)
       } catch {
         /* ignore corrupt draft */
@@ -156,7 +165,8 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
             customerAddress,
             invoiceDate,
             paymentMode,
-            overallDiscount,
+            discountType,
+            discountValue,
             items,
           })
         )
@@ -173,7 +183,8 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
     customerAddress,
     invoiceDate,
     paymentMode,
-    overallDiscount,
+    discountType,
+    discountValue,
     items,
   ])
 
@@ -273,7 +284,13 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
   }
 
   const subtotal = items.reduce((s, i) => s + i.amount, 0)
-  const { taxableAmount, cgstAmount, sgstAmount, totalAmount } = computeBillTotals(subtotal, overallDiscount)
+
+  const calculatedDiscountAmount =
+    discountType === 'percent'
+      ? Math.round(((subtotal * (discountValue || 0)) / 100) * 100) / 100
+      : discountValue || 0
+
+  const { taxableAmount, cgstAmount, sgstAmount, totalAmount } = computeBillTotals(subtotal, calculatedDiscountAmount)
 
   const handleSubmit = async () => {
     const next: Record<string, string> = {}
@@ -282,7 +299,7 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
     if (items.some((i) => !i.description.trim() || i.rate <= 0)) {
       next.items = 'Each item needs a description and rate greater than zero'
     }
-    if (overallDiscount > subtotal) next.discount = 'Discount cannot exceed the subtotal'
+    if (calculatedDiscountAmount > subtotal) next.discount = 'Discount cannot exceed the subtotal'
     setErrors(next)
     if (Object.keys(next).length > 0) {
       toast.error('Please fix the highlighted fields')
@@ -305,6 +322,7 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
       customerAddress,
       invoiceDate,
       subtotal,
+      discountAmount: calculatedDiscountAmount,
       cgstAmount,
       sgstAmount,
       totalAmount,
@@ -346,7 +364,7 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
     { mode: 'UPI', label: 'UPI GPay', icon: <Smartphone className="w-3.5 h-3.5" /> },
     { mode: 'Cash', label: 'Cash', icon: <Coins className="w-3.5 h-3.5" /> },
     { mode: 'Card', label: 'Card', icon: <CreditCard className="w-3.5 h-3.5" /> },
-    { mode: 'Bank Transfer', label: 'Bank', icon: <Landmark className="w-3.5 h-3.5" /> },
+    { mode: 'Bank Transfer', label: 'Bank', icon: <Landmark className="w-3.5 h-3.5 text-[11px]" /> },
   ]
 
   const summaryBlock = (
@@ -356,8 +374,10 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
         <span className="font-mono tabular-nums">₹{subtotal.toFixed(2)}</span>
       </div>
       <div className="flex justify-between text-rose-600 border-b border-ink-100 pb-2">
-        <span>Discount</span>
-        <span className="font-mono tabular-nums">-₹{overallDiscount.toFixed(2)}</span>
+        <span>
+          Discount {discountType === 'percent' && discountValue > 0 ? `(${discountValue}%)` : ''}
+        </span>
+        <span className="font-mono tabular-nums">-₹{calculatedDiscountAmount.toFixed(2)}</span>
       </div>
       <div className="flex justify-between text-ink-900 font-bold pt-1">
         <span>Taxable</span>
@@ -377,6 +397,85 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
           ₹{totalAmount.toFixed(2)}
         </span>
       </div>
+    </div>
+  )
+
+  const renderDiscountControl = () => (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <label className={labelCls}>Discount</label>
+        <div className="inline-flex bg-ink-100/60 p-0.5 rounded-lg border border-ink-100/80 text-[11px] font-bold">
+          <button
+            type="button"
+            onClick={() => {
+              if (discountType === 'percent') {
+                const converted = subtotal > 0 ? Math.round(((subtotal * discountValue) / 100) * 100) / 100 : discountValue
+                setDiscountType('fixed')
+                setDiscountValue(converted)
+              }
+            }}
+            className={cn(
+              'px-2.5 py-1 rounded-md transition-all cursor-pointer',
+              discountType === 'fixed'
+                ? 'bg-white text-ink-900 shadow-sm border border-ink-100/40'
+                : 'text-ink-500 hover:text-ink-900'
+            )}
+          >
+            ₹ Amount
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (discountType === 'fixed') {
+                const converted = subtotal > 0 ? Math.round(((discountValue / subtotal) * 100) * 100) / 100 : 0
+                setDiscountType('percent')
+                setDiscountValue(Math.min(100, converted))
+              }
+            }}
+            className={cn(
+              'px-2.5 py-1 rounded-md transition-all cursor-pointer',
+              discountType === 'percent'
+                ? 'bg-white text-ink-900 shadow-sm border border-ink-100/40'
+                : 'text-ink-500 hover:text-ink-900'
+            )}
+          >
+            % Percent
+          </button>
+        </div>
+      </div>
+
+      <div className="relative rounded-xl border border-ink-100 bg-white focus-within:border-gold-600 focus-within:ring-2 focus-within:ring-gold-600/15">
+        <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-ink-400 text-xs font-semibold">
+          {discountType === 'fixed' ? '₹' : '%'}
+        </span>
+        <input
+          type="number"
+          min={0}
+          max={discountType === 'percent' ? 100 : undefined}
+          step={discountType === 'percent' ? '1' : '0.01'}
+          placeholder={discountType === 'fixed' ? '0.00' : '0'}
+          value={discountValue || ''}
+          onChange={(e) => {
+            const raw = parseFloat(e.target.value) || 0
+            const val = Math.max(0, raw)
+            setDiscountValue(discountType === 'percent' ? Math.min(100, val) : val)
+          }}
+          style={{ paddingLeft: '34px' }}
+          className={cn(
+            'w-full bg-transparent border-0 rounded-xl pr-3.5 py-2.5 text-base md:text-sm text-ink-900 focus:outline-none font-semibold font-mono input-mobile-lg',
+            errors.discount && 'text-rose-600'
+          )}
+        />
+      </div>
+
+      {discountType === 'percent' && discountValue > 0 && (
+        <p className="text-[11px] text-ink-500 font-medium flex justify-between pt-0.5">
+          <span>Applied discount:</span>
+          <span className="font-mono font-bold text-rose-600">-₹{calculatedDiscountAmount.toFixed(2)}</span>
+        </p>
+      )}
+
+      {errors.discount && <p className="text-[11px] text-rose-600 font-medium mt-1">{errors.discount}</p>}
     </div>
   )
 
@@ -670,17 +769,7 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
             {summaryBlock}
 
             <div className="pt-3 border-t border-ink-100">
-              <Field label="Discount (₹)" error={errors.discount}>
-                <input
-                  type="number"
-                  min={0}
-                  step="0.01"
-                  placeholder="0.00"
-                  value={overallDiscount || ''}
-                  onChange={(e) => setOverallDiscount(Math.max(0, parseFloat(e.target.value) || 0))}
-                  className={inputCls}
-                />
-              </Field>
+              {renderDiscountControl()}
             </div>
 
             <div className="space-y-2">
@@ -725,18 +814,7 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
             <h3 className="text-xs font-bold text-ink-900 tracking-wide border-b border-ink-100 pb-2">
               Checkout details
             </h3>
-            <Field label="Discount (₹)" error={errors.discount}>
-              <input
-                type="number"
-                min={0}
-                step="0.01"
-                inputMode="decimal"
-                placeholder="0.00"
-                value={overallDiscount || ''}
-                onChange={(e) => setOverallDiscount(Math.max(0, parseFloat(e.target.value) || 0))}
-                className={inputCls}
-              />
-            </Field>
+            {renderDiscountControl()}
             <div className="space-y-2">
               <label className={labelCls}>Payment mode</label>
               <div className="grid grid-cols-2 gap-2">

@@ -214,117 +214,105 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
       </div>
 
       {/* Printable card */}
-      <div className="print-container bg-white border border-gold-600/20 p-5 sm:p-8 md:p-12 rounded-3xl shadow-xl relative overflow-hidden text-ink-900 ring-1 ring-gold-100">
-        {/* Gold hairline frame */}
-        <div className="pointer-events-none absolute inset-3 sm:inset-4 border border-gold-600/25 rounded-2xl print-gold" />
-
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none opacity-[0.03] p-4">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/logo-v2.png"
-            alt=""
-            className="w-72 h-72 sm:w-96 sm:h-96 max-w-[16rem] max-h-[16rem] sm:max-w-none object-contain aspect-square"
-          />
-        </div>
-
-        <div className="space-y-6 sm:space-y-8 relative z-10">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-ink-100 pb-6 gap-4 print-border">
-            <div className="flex items-center gap-4">
+      <div className="print-container bg-white border border-gold-600/30 p-6 sm:p-8 rounded-2xl shadow-xl relative text-ink-900 ring-1 ring-gold-100/50">
+        <div className="space-y-5 sm:space-y-6 relative z-10">
+          {/* Header */}
+          <div className="flex flex-col md:flex-row justify-between items-start border-b border-gold-600/30 pb-5 gap-4 print-flex-row">
+            <div className="flex items-start gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/logo-v2.png"
                 alt="Gauram Logo"
-                className="w-12 h-12 sm:w-16 sm:h-16 rounded-full object-contain border border-gold-600/20 bg-white p-1"
+                className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-contain border border-gold-600/30 bg-white p-1 shrink-0"
+                style={{ minWidth: '3rem' }}
                 onError={(e) => {
                   e.currentTarget.style.display = 'none'
                 }}
               />
-              <div className="space-y-0.5">
-                <h1 className="font-serif text-xl sm:text-2xl font-bold text-ink-900 tracking-wide print-text-dark">
+              <div>
+                <h1 className="font-serif text-xl sm:text-2xl font-bold text-ink-900 tracking-wide" style={{ whiteSpace: 'nowrap' }}>
                   {studioName}
                 </h1>
-                <p className="text-[11px] sm:text-xs text-gold-600 tracking-widest font-serif uppercase font-semibold print-gold">
+                <p className="text-[10px] sm:text-[11px] text-gold-600 tracking-[0.15em] font-serif uppercase font-bold mt-0.5">
                   Designing Dreams, Creating Elegance
                 </p>
-                <div className="text-[11px] sm:text-xs text-ink-500 space-y-0.5 print-text-dark max-w-xs font-light">
-                  <p>{settings?.address || 'Budigere Road, Bengaluru'}</p>
-                  <p className="font-semibold">Phone: {settings?.phone || '+91 99004 69746'}</p>
+                <div className="text-[10px] sm:text-[11px] text-ink-600 font-light mt-1">
+                  <p className="leading-snug max-w-xs">{settings?.address || 'Budigere Road, Bengaluru'}</p>
+                  <p className="font-semibold text-ink-900 mt-0.5">Phone: {settings?.phone || '+91 99004 69746'}</p>
+                  {settings?.gstin && <p className="font-mono mt-0.5">GSTIN: {settings.gstin}</p>}
                 </div>
               </div>
             </div>
 
-            <div className="space-y-1 text-left md:text-right w-full md:w-auto">
-              <div className="text-[11px] sm:text-xs text-ink-500 print-text-dark space-y-1">
+            <div className="text-left md:text-right print-text-right shrink-0">
+              <div className="text-[10px] sm:text-[11px] text-ink-600 space-y-1">
                 <p>
-                  <span className="font-semibold text-ink-900 print-text-dark">Invoice ID: </span>
-                  <span className="font-mono font-bold text-ink-900 print-text-dark text-sm break-all">
+                  <span className="font-semibold text-ink-900">Invoice No: </span>
+                  <span className="font-mono font-bold text-ink-900 text-sm">
                     {invoice.orderId || 'Draft'}
                   </span>
                 </p>
                 <p>
-                  <span className="font-semibold text-ink-900 print-text-dark">Date: </span>
-                  <span>{fmtDateIN(invoice.invoiceDate)}</span>
+                  <span className="font-semibold text-ink-900">Date: </span>
+                  <span className="font-mono">{fmtDateIN(invoice.invoiceDate)}</span>
                 </p>
-                <p>
-                  <span className="font-semibold text-ink-900 print-text-dark">GSTIN: </span>
-                  <span className="font-mono text-ink-900 print-text-dark text-[11px] sm:text-xs break-all">
-                    {settings?.gstin || '29GYCPP4290P1ZG'}
+                <p className="pt-1">
+                  <span className="inline-block px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-gold-100 text-gold-600 border border-gold-600/30">
+                    {invoice.paymentMode}
                   </span>
-                </p>
-                <p>
-                  <Badge className="print-text-dark">{invoice.paymentMode}</Badge>
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-paper/30 border border-ink-100 p-4 sm:p-5 rounded-2xl print-border print-text-dark">
-            <h3 className="font-serif text-[11px] sm:text-xs font-bold text-ink-500 tracking-wide mb-2.5 print-text-dark">
+          {/* Billed to */}
+          <div className="bg-paper/40 border border-gold-600/20 p-3 sm:p-4 rounded-xl">
+            <h3 className="font-serif text-[10px] sm:text-[11px] font-bold text-gold-600 tracking-wider uppercase mb-1.5">
               Billed to
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 text-sm text-ink-500 print-text-dark">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-ink-600 print-grid-2">
               <div>
-                <p className="font-bold text-ink-900 print-text-dark font-serif text-base">{invoice.customer.name}</p>
-                <p className="mt-1 font-semibold">{fmtPhone(invoice.customer.phone)}</p>
+                <p className="font-bold text-ink-900 font-serif text-base">{invoice.customer.name}</p>
+                <p className="mt-1 font-semibold font-mono text-xs text-ink-700">{fmtPhone(invoice.customer.phone)}</p>
               </div>
               <div>
                 {invoice.customer.address ? (
                   <>
-                    <p className="font-semibold text-ink-900 print-text-dark">Address</p>
-                    <p className="mt-0.5 leading-relaxed font-light">{invoice.customer.address}</p>
+                    <p className="font-semibold text-ink-900 text-xs">Address</p>
+                    <p className="mt-0.5 leading-relaxed font-light text-xs">{invoice.customer.address}</p>
                   </>
                 ) : (
-                  <p className="text-ink-400 italic print-text-dark font-light">No billing address provided.</p>
+                  <p className="text-ink-400 italic text-xs font-light">No billing address provided.</p>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Line items — always printable table */}
+          {/* Line items table */}
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm border-collapse print-table">
+            <table className="w-full text-left text-sm border-collapse">
               <thead>
-                <tr className="border-b-2 border-gold-600/40 print-border text-ink-500 print-text-dark font-semibold tracking-wide">
-                  <th className="py-3 px-2 text-center w-10 text-[11px]">No.</th>
-                  <th className="py-3 px-3 text-[11px]">Garment / Description</th>
-                  <th className="py-3 px-2 text-center w-12 text-[11px]">Qty</th>
-                  <th className="py-3 px-3 text-right text-[11px]">Rate</th>
-                  <th className="py-3 px-3 text-right text-[11px]">Amount</th>
+                <tr className="border-b-2 border-gold-600/40 text-ink-500 font-bold tracking-wide text-[11px] uppercase">
+                  <th className="py-2.5 px-2 text-center w-[8%]">No.</th>
+                  <th className="py-2.5 px-3 w-[48%]">Garment / Description</th>
+                  <th className="py-2.5 px-2 text-center w-[10%]">Qty</th>
+                  <th className="py-2.5 px-3 text-right w-[17%]">Rate</th>
+                  <th className="py-2.5 px-3 text-right w-[17%]">Amount</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-ink-100/50 print-border">
+              <tbody className="divide-y divide-ink-100">
                 {invoice.items.map((item, index) => (
-                  <tr key={item.id} className="text-ink-700 print-text-dark">
+                  <tr key={item.id} className="text-ink-700">
                     <td className="py-3 px-2 text-center font-mono text-xs">{index + 1}</td>
                     <td className="py-3 px-3">
-                      <span className="font-semibold text-ink-900 print-text-dark block">{item.description}</span>
+                      <span className="font-semibold text-ink-900 block">{item.description}</span>
                       <span className="text-[11px] text-ink-400 font-mono">
                         {item.hsnSacCode || item.category}
                       </span>
                     </td>
                     <td className="py-3 px-2 text-center font-mono">{item.quantity}</td>
                     <td className="py-3 px-3 text-right font-mono tabular-nums">{fmtINRExact(item.rate)}</td>
-                    <td className="py-3 px-3 text-right font-bold text-ink-900 print-text-dark font-mono tabular-nums">
+                    <td className="py-3 px-3 text-right font-bold text-ink-900 font-mono tabular-nums">
                       {fmtINRExact(item.amount)}
                     </td>
                   </tr>
@@ -333,57 +321,58 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
             </table>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 pt-4 border-t border-ink-100 print-border relative">
-            <div className="md:col-span-7 space-y-2 text-[11px] sm:text-xs text-ink-500 print-text-dark max-w-prose">
-              <h4 className="font-semibold text-ink-900 print-text-dark tracking-wide text-[11px]">
+          {/* Terms & Totals */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 pt-4 border-t border-ink-100 print-grid-split">
+            <div className="md:col-span-7 space-y-2 text-[11px] sm:text-xs text-ink-500 max-w-prose">
+              <h4 className="font-semibold text-ink-900 tracking-wide text-[11px] uppercase">
                 Terms & conditions
               </h4>
-              <div className="whitespace-pre-line leading-relaxed font-light">
+              <div className="whitespace-pre-line leading-relaxed font-light text-ink-600">
                 {invoice.termsText || settings?.termsAndConds}
               </div>
             </div>
 
-            <div className="md:col-span-5 space-y-2 text-sm text-ink-700 print-text-dark">
-              <div className="flex justify-between">
+            <div className="md:col-span-5 space-y-2 text-sm text-ink-700">
+              <div className="flex justify-between text-xs">
                 <span>Subtotal</span>
                 <span className="font-mono tabular-nums">{fmtINRExact(invoice.subtotal)}</span>
               </div>
               {hasDiscount && (
-                <div className="flex justify-between text-rose-600">
+                <div className="flex justify-between text-xs text-rose-600">
                   <span>Discount</span>
                   <span className="font-mono tabular-nums">-{fmtINRExact(calculatedDiscount)}</span>
                 </div>
               )}
               {hasDiscount && (
-                <div className="flex justify-between font-semibold text-ink-900">
+                <div className="flex justify-between text-xs font-semibold text-ink-900">
                   <span>Taxable</span>
                   <span className="font-mono tabular-nums">
                     {fmtINRExact(invoice.subtotal - calculatedDiscount)}
                   </span>
                 </div>
               )}
-              <div className="flex justify-between">
+              <div className="flex justify-between text-xs">
                 <span>CGST (6%)</span>
                 <span className="font-mono tabular-nums">{fmtINRExact(invoice.cgstAmount)}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between text-xs">
                 <span>SGST (6%)</span>
                 <span className="font-mono tabular-nums">{fmtINRExact(invoice.sgstAmount)}</span>
               </div>
-              <div className="border-t border-ink-100 print-border my-1.5" />
-              <div className="flex justify-between items-end font-bold text-ink-900 print-text-dark">
+              <div className="border-t border-ink-100 my-1.5" />
+              <div className="flex justify-between items-end font-bold text-ink-900">
                 <span className="font-serif text-base">Grand Total</span>
-                <span className="font-mono text-lg tabular-nums border-b-2 border-gold-600 pb-0.5 print-gold">
+                <span className="font-mono text-lg tabular-nums border-b-2 border-gold-600 pb-0.5">
                   {fmtINRExact(invoice.totalAmount)}
                 </span>
               </div>
 
-              <div className="mt-4 md:mt-0 flex justify-center md:absolute md:right-0 md:bottom-12 md:rotate-[-12deg] pointer-events-none select-none opacity-90">
-                <div className="border-4 border-double border-gold-600 text-gold-600 rounded-xl px-4 py-2 flex flex-col items-center justify-center font-bold tracking-widest uppercase paid-stamp-print print-gold">
-                  <span className="text-xs tracking-widest flex items-center gap-1 font-serif">
+              <div className="mt-4 flex justify-end">
+                <div className="border-2 border-double border-gold-600 text-gold-600 rounded-xl px-3 py-1 flex flex-col items-center justify-center font-bold tracking-widest uppercase bg-white">
+                  <span className="text-[11px] tracking-widest flex items-center gap-1 font-serif">
                     PAID IN FULL <Check className="w-3.5 h-3.5 stroke-[3px]" />
                   </span>
-                  <span className="text-[10px] font-mono mt-0.5 tracking-wider normal-case">
+                  <span className="text-[9px] font-mono mt-0.5 tracking-wider normal-case">
                     Settled · {invoice.paymentMode}
                   </span>
                 </div>
@@ -391,18 +380,21 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
             </div>
           </div>
 
-          <div className="print-only pt-16 flex justify-between items-center text-[11px] text-ink-700">
-            <div className="w-44 text-center border-t border-black pt-2 font-light">Customer Signature</div>
-            <div className="w-52 text-center border-t border-black pt-2 flex flex-col gap-1">
-              <p className="font-bold text-ink-900">For {studioName}</p>
-              <p className="text-[10px] mt-6 opacity-60">Authorized Signatory</p>
+          {/* Signatures */}
+          <div className="pt-6 flex justify-between items-end text-[11px] text-ink-700 print-signatures">
+            <div className="text-center" style={{ width: '44mm' }}>
+              <div className="border-t-2 border-ink-900/40 pt-1.5 font-medium text-ink-900 text-[11px]">Customer Signature</div>
+            </div>
+            <div className="text-center" style={{ width: '54mm' }}>
+              <p className="font-bold text-ink-900 text-[11px] mb-5">For {studioName}</p>
+              <div className="border-t-2 border-ink-900/40 pt-1.5 text-[10px] text-ink-600">Authorized Signatory</div>
             </div>
           </div>
 
-          <div className="pt-4 border-t border-gold-600/30 text-center print-gold">
-            <p className="text-[11px] text-ink-500 print-text-dark">
+          {/* Footer Note */}
+          <div className="pt-4 border-t border-gold-600/30 text-center">
+            <p className="text-[11px] text-ink-500">
               Thank you for choosing {studioName}
-              {settings?.website ? ` · ${settings.website}` : ''}
             </p>
           </div>
         </div>

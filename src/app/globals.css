@@ -99,6 +99,18 @@ input::placeholder, textarea::placeholder {
   color: #8a8175;
 }
 
+/* Hide number input spinners / arrows */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -111,27 +123,134 @@ input::placeholder, textarea::placeholder {
   }
 }
 
+@page {
+  size: A4 portrait;
+  margin: 0;
+}
+
 /* Print optimizations */
 @media print {
-  body { background: #fff !important; color: #000 !important; font-size: 11pt; }
-  .no-print { display: none !important; }
-  .print-only { display: block !important; }
-  .print-hide { display: none !important; }
-  .print-table { display: table !important; width: 100% !important; }
-  .print-container {
-    width: 100% !important; max-width: 100% !important;
-    padding: 0 !important; margin: 0 !important;
-    box-shadow: none !important; border: none !important;
-    background: #fff !important; color: #000 !important;
-    border-radius: 0 !important;
+  html, body {
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #1a1814 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    font-size: 10pt !important;
   }
-  .print-text-dark { color: #000 !important; }
-  .print-border { border-color: #ccc !important; }
-  .print-gold { color: #7a5e1f !important; border-color: #7a5e1f !important; }
 
-  .paid-stamp-print {
-    border: 3px double #7a5e1f !important;
-    color: #7a5e1f !important;
+  .no-print, header, footer, nav, aside {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+
+  /* Outer wrapper — fills the printable area, border on all sides */
+  .print-container {
+    width: 100% !important;
+    margin: 10mm 12mm !important;
+    width: calc(100% - 24mm) !important;
+    padding: 6mm 8mm !important;
+    box-shadow: none !important;
+    border: 1.5pt solid #b08d3f !important;
+    border-radius: 0 !important;
+    background: #ffffff !important;
+    color: #1a1814 !important;
+    box-sizing: border-box !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* Suppress all the decorative spacing that bleeds the layout into 2 pages */
+  .print-container .space-y-6,
+  .print-container .space-y-8,
+  .print-container .sm\:space-y-8 {
+    gap: 0 !important;
+  }
+  .print-container .space-y-6 > * + * {
+    margin-top: 4mm !important;
+  }
+
+  /* Header row: logo+name on left, invoice meta on right */
+  .print-flex-row {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+    width: 100% !important;
+    padding-bottom: 3mm !important;
+    margin-bottom: 3mm !important;
+  }
+
+  /* Billed-to grid: name|address side by side */
+  .print-grid-2 {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8mm !important;
+    width: 100% !important;
+  }
+
+  /* Terms + Totals: left block / right block */
+  .print-grid-split {
+    display: grid !important;
+    grid-template-columns: 55% 45% !important;
+    gap: 6mm !important;
+    width: 100% !important;
+  }
+
+  .print-text-right {
+    text-align: right !important;
+  }
+
+  /* Signature row */
+  .print-signatures {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: flex-end !important;
+    width: 100% !important;
+    padding-top: 6mm !important;
+    margin-top: 0 !important;
+  }
+
+  /* Tighten up internal paddings so nothing overflows */
+  .print-container table th,
+  .print-container table td {
+    padding-top: 3pt !important;
+    padding-bottom: 3pt !important;
+    font-size: 9pt !important;
+  }
+
+  .print-container h1 {
+    font-size: 14pt !important;
+    line-height: 1.2 !important;
+  }
+
+  /* Remove rounded corners from billed-to box */
+  .print-container .rounded-xl {
+    border-radius: 4px !important;
+  }
+
+  /* Force inline-flex badges to render correctly */
+  .print-container .rounded-full {
+    border-radius: 99px !important;
+    display: inline-block !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Eliminate pt-10 (2.5rem) on signatures */
+  .print-container .pt-10 {
+    padding-top: 0 !important;
+  }
+
+  /* Remove the extra pb-28 that pushes content down */
+  .pb-28 {
+    padding-bottom: 0 !important;
   }
 }
 .print-only { display: none; }
