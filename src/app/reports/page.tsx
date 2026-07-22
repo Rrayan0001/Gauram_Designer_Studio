@@ -99,10 +99,12 @@ export default function ReportsPage() {
 
   filteredInvoices.forEach((inv) => {
     inv.items.forEach((item) => {
-      if (item.category in categoryStats) {
-        categoryStats[item.category].count += 1
-        categoryStats[item.category].total += item.amount
+      const cat = item.category || 'Other'
+      if (!categoryStats[cat]) {
+        categoryStats[cat] = { count: 0, total: 0 }
       }
+      categoryStats[cat].count += 1
+      categoryStats[cat].total += item.amount
     })
   })
 

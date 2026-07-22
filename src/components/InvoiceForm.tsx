@@ -32,6 +32,7 @@ interface Customer {
 interface InvoiceItemInput {
   description: string
   category: Category
+  customCategory?: string
   hsnSacCode: string
   quantity: number
   rate: number
@@ -94,10 +95,12 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
 
   const [items, setItems] = useState<InvoiceItemInput[]>(
     initialInvoice?.items?.map((item) => {
-      const cat = (item.category as Category) || "Women's Wear"
+      const cat = item.category || "Women's Wear"
+      const isStd = CATEGORIES.includes(cat as any)
       return {
         description: item.description,
-        category: cat,
+        category: isStd ? cat : 'Other',
+        customCategory: isStd ? '' : cat,
         hsnSacCode: item.hsnSacCode || hsnForCategory(cat),
         quantity: item.quantity,
         rate: item.rate,
@@ -109,6 +112,7 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
       {
         description: '',
         category: "Women's Wear",
+        customCategory: '',
         hsnSacCode: CATEGORY_HSN["Women's Wear"],
         quantity: 1,
         rate: 0,
@@ -240,6 +244,7 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
       {
         description: '',
         category: "Women's Wear",
+        customCategory: '',
         hsnSacCode: CATEGORY_HSN["Women's Wear"],
         quantity: 1,
         rate: 0,
@@ -307,13 +312,20 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
     }
     setSubmitting(true)
 
-    const payloadItems = items.map((item) => ({
-      ...item,
-      category: item.category,
-      hsnSacCode: item.hsnSacCode || hsnForCategory(item.category),
-      discount: 0,
-      gstRate: 12,
-    }))
+    const payloadItems = items.map((item) => {
+      const isStd = CATEGORIES.includes(item.category as any) && item.category !== 'Other'
+      const finalCategory = isStd
+        ? item.category
+        : (item.customCategory?.trim() || (item.category !== 'Other' ? item.category : 'Other'))
+
+      return {
+        ...item,
+        category: finalCategory,
+        hsnSacCode: item.hsnSacCode || hsnForCategory(finalCategory),
+        discount: 0,
+        gstRate: 12,
+      }
+    })
 
     const payload = {
       customerId: customerId || undefined,
@@ -683,8 +695,16 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
                     <div className="md:col-span-3 space-y-1">
                       <label className={labelCls}>Category</label>
                       <select
-                        value={item.category}
-                        onChange={(e) => handleItemChange(index, 'category', e.target.value)}
+                        value={CATEGORIES.includes(item.category as any) ? item.category : 'Other'}
+                        onChange={(e) => {
+                          const val = e.target.value
+                          handleItemChange(index, 'category', val)
+                          if (val === 'Other') {
+                            setItems((prev) =>
+                              prev.map((it, i) => (i === index ? { ...it, customCategory: it.customCategory || '' } : it))
+                            )
+                          }
+                        }}
                         className={inputCls}
                       >
                         {CATEGORIES.map((c) => (
@@ -692,7 +712,24 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
                             {c}
                           </option>
                         ))}
+                        <option value="Other">+ Other (Custom)</option>
                       </select>
+                      {(!CATEGORIES.includes(item.category as any) || item.category === 'Other') && (
+                        <div className="pt-1.5">
+                          <input
+                            type="text"
+                            placeholder="Enter custom category"
+                            value={item.customCategory !== undefined ? item.customCategory : (CATEGORIES.includes(item.category as any) ? '' : item.category === 'Other' ? '' : item.category)}
+                            onChange={(e) => {
+                              const val = e.target.value
+                              setItems((prev) =>
+                                prev.map((it, i) => (i === index ? { ...it, customCategory: val } : it))
+                              )
+                            }}
+                            className={cn(inputCls, 'text-xs border-gold-600/40 bg-gold-100/10 focus:border-gold-600')}
+                          />
+                        </div>
+                      )}
                     </div>
                     <div className="md:col-span-1 space-y-1">
                       <label className={labelCls}>Qty</label>
