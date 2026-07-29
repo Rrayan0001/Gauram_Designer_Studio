@@ -1,10 +1,10 @@
 /** Shared billing helpers for invoice status, phone cleanup, and categories */
 
 export const CATEGORIES = [
-  { value: "Women's Wear", hsn: 'HSN 6204' },
-  { value: "Men's Wear", hsn: 'HSN 6203' },
-  { value: 'Kids Wear', hsn: 'HSN 6209' },
-  { value: 'Rental', hsn: 'SAC 9983' },
+  { value: "Women's Wear" },
+  { value: "Men's Wear" },
+  { value: 'Kids Wear' },
+  { value: 'Rental' },
 ] as const
 
 export type InvoiceStatus = 'draft' | 'pending' | 'partial' | 'paid'
@@ -25,10 +25,6 @@ export function whatsappPhone(phone: string): string {
   if (digits.startsWith('91') && digits.length === 12) return digits
   if (digits.startsWith('0') && digits.length === 11) return `91${digits.slice(1)}`
   return digits
-}
-
-export function hsnForCategory(category: string): string {
-  return CATEGORIES.find((c) => c.value === category)?.hsn ?? 'HSN 6204'
 }
 
 export function roundMoney(n: number): number {

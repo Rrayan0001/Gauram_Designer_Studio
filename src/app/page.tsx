@@ -25,8 +25,6 @@ interface Invoice {
   invoiceDate: string
   status: string
   subtotal: number
-  cgstAmount: number
-  sgstAmount: number
   totalAmount: number
   amountPaid: number
   pendingAmount: number

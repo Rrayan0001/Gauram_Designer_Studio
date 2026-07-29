@@ -16,7 +16,6 @@ async function main() {
       phone: '+91 99004 69746',
       email: 'gauramfashionacademy@gmail.com',
       website: 'www.gauramfashionacademy.com',
-      gstin: '29GYCPP4290P1ZG',
       termsAndConds:
         '1. Advance payment is non-refundable.\n2. Rental deposit terms apply.\n3. Alteration requests are accepted within 7 days of delivery.\n4. Rental outfits must be returned in original condition; damage charges apply.',
       invoicePrefix: 'GDS/2026/',

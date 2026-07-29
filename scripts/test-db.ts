@@ -11,7 +11,6 @@ async function testDatabase() {
     })
     console.log('✅ Settings Fetch: SUCCESS')
     console.log(`   Business Name: ${settings?.name}`)
-    console.log(`   GSTIN: ${settings?.gstin}`)
 
     // 2. Fetch Customers
     const customers = await prisma.customer.findMany()

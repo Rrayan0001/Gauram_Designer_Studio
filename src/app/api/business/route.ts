@@ -10,7 +10,6 @@ function pickSettings(body: Record<string, unknown>): Prisma.BusinessSettingsUpd
   if (typeof body.phone === 'string') data.phone = body.phone
   if (typeof body.email === 'string') data.email = body.email
   if (typeof body.website === 'string') data.website = body.website
-  if (typeof body.gstin === 'string') data.gstin = body.gstin
   if (typeof body.termsAndConds === 'string') data.termsAndConds = body.termsAndConds
   if (typeof body.invoicePrefix === 'string') data.invoicePrefix = body.invoicePrefix
   if (typeof body.logoUrl === 'string' || body.logoUrl === null) {

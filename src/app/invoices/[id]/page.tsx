@@ -12,7 +12,6 @@ interface InvoiceItem {
   id: string
   description: string
   category: string
-  hsnSacCode?: string
   amount: number
   rate: number
   quantity: number
@@ -22,8 +21,6 @@ interface Invoice {
   orderId: string | null
   invoiceDate: string
   subtotal: number
-  cgstAmount: number
-  sgstAmount: number
   totalAmount: number
   paymentMode: string
   items: InvoiceItem[]
@@ -43,7 +40,6 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
     phone?: string
     email?: string
     website?: string
-    gstin?: string
     termsAndConds?: string
   } | null>(null)
   const [loading, setLoading] = useState(true)
@@ -103,12 +99,10 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
       itemLines,
       ``,
       `Subtotal: ₹${invoice.subtotal.toLocaleString('en-IN')}`,
-      `CGST: ₹${invoice.cgstAmount.toLocaleString('en-IN')} · SGST: ₹${invoice.sgstAmount.toLocaleString('en-IN')}`,
       `*Grand Total: ₹${invoice.totalAmount.toLocaleString('en-IN')}*`,
       `Paid via ${invoice.paymentMode}`,
       ``,
       settings?.address ? settings.address.split(',')[0] : '',
-      settings?.gstin ? `GSTIN: ${settings.gstin}` : '',
     ]
       .filter(Boolean)
       .join('\n')
@@ -137,7 +131,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
     )
   }
 
-  const calculatedDiscount = Math.max(0, invoice.subtotal - invoice.cgstAmount / 0.06)
+  const calculatedDiscount = Math.max(0, invoice.subtotal - invoice.totalAmount)
   const hasDiscount = calculatedDiscount > 0.01
   const studioName = settings?.name || 'Gauram Designer Studio'
 
@@ -239,7 +233,6 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
                 <div className="text-[10px] sm:text-[11px] text-ink-600 font-light mt-1">
                   <p className="leading-snug max-w-xs">{settings?.address || 'Budigere Road, Bengaluru'}</p>
                   <p className="font-semibold text-ink-900 mt-0.5">Phone: {settings?.phone || '+91 99004 69746'}</p>
-                  {settings?.gstin && <p className="font-mono mt-0.5">GSTIN: {settings.gstin}</p>}
                 </div>
               </div>
             </div>
@@ -307,7 +300,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
                     <td className="py-3 px-3">
                       <span className="font-semibold text-ink-900 block">{item.description}</span>
                       <span className="text-[11px] text-ink-400 font-mono">
-                        {item.hsnSacCode || item.category}
+                        {item.category}
                       </span>
                     </td>
                     <td className="py-3 px-2 text-center font-mono">{item.quantity}</td>
@@ -343,22 +336,6 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
                   <span className="font-mono tabular-nums">-{fmtINRExact(calculatedDiscount)}</span>
                 </div>
               )}
-              {hasDiscount && (
-                <div className="flex justify-between text-xs font-semibold text-ink-900">
-                  <span>Taxable</span>
-                  <span className="font-mono tabular-nums">
-                    {fmtINRExact(invoice.subtotal - calculatedDiscount)}
-                  </span>
-                </div>
-              )}
-              <div className="flex justify-between text-xs">
-                <span>CGST (6%)</span>
-                <span className="font-mono tabular-nums">{fmtINRExact(invoice.cgstAmount)}</span>
-              </div>
-              <div className="flex justify-between text-xs">
-                <span>SGST (6%)</span>
-                <span className="font-mono tabular-nums">{fmtINRExact(invoice.sgstAmount)}</span>
-              </div>
               <div className="border-t border-ink-100 my-1.5" />
               <div className="flex justify-between items-end font-bold text-ink-900">
                 <span className="font-serif text-base">Grand Total</span>

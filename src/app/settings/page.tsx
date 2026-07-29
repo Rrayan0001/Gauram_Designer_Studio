@@ -5,8 +5,6 @@ import { Building, FileText, ShieldCheck, Save, Check, AlertOctagon, RefreshCw, 
 import { Card, Button, Field, Input, Textarea, Skeleton, PageHeader, ConfirmDialog } from '@/components/ui/Kit'
 import { useToast } from '@/components/ui/Toast'
 
-const GSTIN_RE = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/i
-
 export default function SettingsPage() {
   const toast = useToast()
   const [formData, setFormData] = useState({
@@ -15,7 +13,6 @@ export default function SettingsPage() {
     phone: '',
     email: '',
     website: '',
-    gstin: '',
     invoicePrefix: 'GDS',
     nextInvoiceNum: 1,
     termsAndConds: '',
@@ -24,7 +21,6 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [success, setSuccess] = useState(false)
-  const [gstinError, setGstinError] = useState('')
   const [resetting, setResetting] = useState(false)
   const [resetSuccess, setResetSuccess] = useState(false)
   const [exporting, setExporting] = useState(false)
@@ -41,7 +37,6 @@ export default function SettingsPage() {
             phone: data.phone || '',
             email: data.email || '',
             website: data.website || '',
-            gstin: data.gstin || '',
             invoicePrefix: data.invoicePrefix || 'GDS',
             nextInvoiceNum: data.nextInvoiceNum || 1,
             termsAndConds: data.termsAndConds || '',
@@ -59,16 +54,10 @@ export default function SettingsPage() {
       ...prev,
       [name]: name === 'nextInvoiceNum' ? parseInt(value) || 1 : value,
     }))
-    if (name === 'gstin') setGstinError('')
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (formData.gstin && !GSTIN_RE.test(formData.gstin.trim())) {
-      setGstinError('Enter a valid 15-character GSTIN')
-      toast.error('Invalid GSTIN format')
-      return
-    }
     setSaving(true)
     setSuccess(false)
     try {
@@ -169,29 +158,19 @@ export default function SettingsPage() {
 
       <PageHeader
         title="Studio settings"
-        description="Profile, GST registration, and billing rules"
+        description="Profile, studio contact, and billing rules"
       />
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <Card className="space-y-4">
           <h3 className="font-serif text-sm font-bold text-ink-900 flex items-center gap-2 border-b border-ink-100 pb-2.5">
             <Building className="w-4 h-4 text-gold-600" />
-            Boutique profile & GSTIN
+            Boutique profile
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Field label="Shop name">
               <Input name="name" value={formData.name} onChange={handleChange} required />
-            </Field>
-            <Field label="GSTIN" error={gstinError}>
-              <Input
-                name="gstin"
-                value={formData.gstin}
-                onChange={handleChange}
-                required
-                placeholder="29GYCPP4290P1ZG"
-                className="font-mono font-bold"
-              />
             </Field>
             <Field label="Phone">
               <Input name="phone" value={formData.phone} onChange={handleChange} required />

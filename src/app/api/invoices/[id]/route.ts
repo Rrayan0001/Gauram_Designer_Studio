@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { hsnForCategory, roundMoney, statusFromAmounts } from '@/lib/billing'
+import { roundMoney, statusFromAmounts } from '@/lib/billing'
 
 function mapItems(items: Array<Record<string, unknown>>) {
   return items.map((item) => {
@@ -16,7 +16,6 @@ function mapItems(items: Array<Record<string, unknown>>) {
     return {
       description: String(item.description || ''),
       category,
-      hsnSacCode: String(item.hsnSacCode || hsnForCategory(category)),
       quantity,
       rate,
       discount,
@@ -78,8 +77,6 @@ export async function PUT(
       isFinalizing,
       subtotal,
       discountAmount = existingInvoice.discountAmount ?? 0,
-      cgstAmount,
-      sgstAmount,
       totalAmount,
       amountPaid = existingInvoice.amountPaid,
       paymentMode = existingInvoice.paymentMode,
@@ -163,8 +160,6 @@ export async function PUT(
           status,
           subtotal: parseFloat(String(subtotal)) || 0,
           discountAmount: discount,
-          cgstAmount: parseFloat(String(cgstAmount)) || 0,
-          sgstAmount: parseFloat(String(sgstAmount)) || 0,
           totalAmount: total,
           amountPaid: paid,
           pendingAmount,

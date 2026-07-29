@@ -1,4 +1,4 @@
-/** Category → HSN mapping for boutique garments. */
+/** Boutique garment categories and item templates. */
 
 export const STANDARD_CATEGORIES = [
   "Women's Wear",
@@ -10,20 +10,6 @@ export const STANDARD_CATEGORIES = [
 export const CATEGORIES = [...STANDARD_CATEGORIES]
 
 export type Category = string
-
-export const CATEGORY_HSN: Record<string, string> = {
-  "Women's Wear": "HSN 6204",
-  "Men's Wear": "HSN 6203",
-  "Kids Wear": "HSN 6209",
-  "Rental": "HSN 9988",
-}
-
-export function hsnForCategory(category: string): string {
-  if (category in CATEGORY_HSN) {
-    return CATEGORY_HSN[category]
-  }
-  return "HSN 6204"
-}
 
 /** Quick-fill item templates for the bill form. */
 export const ITEM_TEMPLATES: Array<{

@@ -19,8 +19,7 @@ import {
 import Link from 'next/link'
 import { useToast } from '@/components/ui/Toast'
 import { Avatar, Button, Field } from '@/components/ui/Kit'
-import { computeBillTotals } from '@/lib/gst'
-import { CATEGORIES, CATEGORY_HSN, ITEM_TEMPLATES, type Category, hsnForCategory } from '@/lib/categories'
+import { CATEGORIES, ITEM_TEMPLATES, type Category } from '@/lib/categories'
 import { cn } from '@/lib/cn'
 
 interface Customer {
@@ -33,11 +32,9 @@ interface InvoiceItemInput {
   description: string
   category: Category
   customCategory?: string
-  hsnSacCode: string
   quantity: number
   rate: number
   discount: number
-  gstRate: number
   amount: number
 }
 interface InvoiceFormProps {
@@ -48,11 +45,10 @@ interface InvoiceFormProps {
     invoiceDate?: string
     paymentMode?: string
     subtotal?: number
-    cgstAmount?: number
+    discountAmount?: number
     items?: Array<{
       description: string
       category?: string
-      hsnSacCode?: string
       quantity: number
       rate: number
       amount?: number
@@ -87,10 +83,8 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
 
   const [discountType, setDiscountType] = useState<'fixed' | 'percent'>('fixed')
   const [discountValue, setDiscountValue] = useState<number>(() => {
-    if (!initialInvoice?.cgstAmount || !initialInvoice?.subtotal) return 0
-    const taxableVal = initialInvoice.cgstAmount / 0.06
-    const diff = initialInvoice.subtotal - taxableVal
-    return diff > 0.01 ? Math.round(diff * 100) / 100 : 0
+    if (!initialInvoice?.discountAmount) return 0
+    return Math.round(initialInvoice.discountAmount * 100) / 100
   })
 
   const [items, setItems] = useState<InvoiceItemInput[]>(
@@ -101,11 +95,9 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
         description: item.description,
         category: isStd ? cat : 'Other',
         customCategory: isStd ? '' : cat,
-        hsnSacCode: item.hsnSacCode || hsnForCategory(cat),
         quantity: item.quantity,
         rate: item.rate,
         discount: 0,
-        gstRate: 12,
         amount: item.quantity * item.rate,
       }
     }) || [
@@ -113,11 +105,9 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
         description: '',
         category: "Women's Wear",
         customCategory: '',
-        hsnSacCode: CATEGORY_HSN["Women's Wear"],
         quantity: 1,
         rate: 0,
         discount: 0,
-        gstRate: 12,
         amount: 0,
       },
     ]
@@ -227,9 +217,6 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
     const updated = items.map((item, i) => {
       if (i !== index) return item
       const next = { ...item, [field]: value } as InvoiceItemInput
-      if (field === 'category') {
-        next.hsnSacCode = hsnForCategory(String(value))
-      }
       const qty = parseFloat(String(next.quantity)) || 0
       const rate = parseFloat(String(next.rate)) || 0
       next.amount = qty * rate
@@ -245,11 +232,9 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
         description: '',
         category: "Women's Wear",
         customCategory: '',
-        hsnSacCode: CATEGORY_HSN["Women's Wear"],
         quantity: 1,
         rate: 0,
         discount: 0,
-        gstRate: 12,
         amount: 0,
       },
     ])
@@ -262,7 +247,6 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
         ...updated[emptyIdx],
         description: tpl.description,
         category: tpl.category,
-        hsnSacCode: CATEGORY_HSN[tpl.category],
         rate: tpl.defaultRate || 0,
         amount: (updated[emptyIdx].quantity || 1) * (tpl.defaultRate || 0),
       }
@@ -273,11 +257,9 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
         {
           description: tpl.description,
           category: tpl.category,
-          hsnSacCode: CATEGORY_HSN[tpl.category],
           quantity: 1,
           rate: tpl.defaultRate || 0,
           discount: 0,
-          gstRate: 12,
           amount: tpl.defaultRate || 0,
         },
       ])
@@ -295,7 +277,7 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
       ? Math.round(((subtotal * (discountValue || 0)) / 100) * 100) / 100
       : discountValue || 0
 
-  const { taxableAmount, cgstAmount, sgstAmount, totalAmount } = computeBillTotals(subtotal, calculatedDiscountAmount)
+  const totalAmount = Math.max(0, Math.round((subtotal - calculatedDiscountAmount) * 100) / 100)
 
   const handleSubmit = async () => {
     const next: Record<string, string> = {}
@@ -321,9 +303,7 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
       return {
         ...item,
         category: finalCategory,
-        hsnSacCode: item.hsnSacCode || hsnForCategory(finalCategory),
         discount: 0,
-        gstRate: 12,
       }
     })
 
@@ -335,8 +315,6 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
       invoiceDate,
       subtotal,
       discountAmount: calculatedDiscountAmount,
-      cgstAmount,
-      sgstAmount,
       totalAmount,
       amountPaid: totalAmount,
       paymentMode,
@@ -385,24 +363,14 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
         <span>Subtotal</span>
         <span className="font-mono tabular-nums">₹{subtotal.toFixed(2)}</span>
       </div>
-      <div className="flex justify-between text-rose-600 border-b border-ink-100 pb-2">
-        <span>
-          Discount {discountType === 'percent' && discountValue > 0 ? `(${discountValue}%)` : ''}
-        </span>
-        <span className="font-mono tabular-nums">-₹{calculatedDiscountAmount.toFixed(2)}</span>
-      </div>
-      <div className="flex justify-between text-ink-900 font-bold pt-1">
-        <span>Taxable</span>
-        <span className="font-mono tabular-nums">₹{taxableAmount.toFixed(2)}</span>
-      </div>
-      <div className="flex justify-between text-ink-500 font-medium">
-        <span>CGST (6%)</span>
-        <span className="font-mono tabular-nums">₹{cgstAmount.toFixed(2)}</span>
-      </div>
-      <div className="flex justify-between text-ink-500 font-medium">
-        <span>SGST (6%)</span>
-        <span className="font-mono tabular-nums">₹{sgstAmount.toFixed(2)}</span>
-      </div>
+      {calculatedDiscountAmount > 0 && (
+        <div className="flex justify-between text-rose-600 border-b border-ink-100 pb-2">
+          <span>
+            Discount {discountType === 'percent' && discountValue > 0 ? `(${discountValue}%)` : ''}
+          </span>
+          <span className="font-mono tabular-nums">-₹{calculatedDiscountAmount.toFixed(2)}</span>
+        </div>
+      )}
       <div className="border-t border-ink-100 pt-3 flex justify-between items-end text-ink-900">
         <span className="font-serif text-base font-semibold">Grand Total</span>
         <span className="font-mono text-xl font-bold tabular-nums border-b-2 border-gold-600 pb-0.5">
@@ -634,7 +602,7 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 bg-paper/50 border border-ink-100 rounded-2xl px-4 md:px-5 py-4">
               <div>
                 <h3 className="text-sm font-bold text-ink-900">Garments & services</h3>
-                <p className="text-[11px] text-ink-500 font-medium">GST flat @ 12% (CGST 6% + SGST 6%)</p>
+                <p className="text-[11px] text-ink-500 font-medium">Boutique line items</p>
               </div>
               <Button type="button" variant="ink" size="sm" onClick={addItem}>
                 <Plus className="w-3.5 h-3.5" /> Add item
@@ -761,8 +729,7 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-center bg-paper/50 rounded-xl p-3 border border-ink-100/50 text-[11px] font-semibold">
-                    <span className="text-ink-500 font-mono">{item.hsnSacCode}</span>
+                  <div className="flex justify-end items-center bg-paper/50 rounded-xl p-3 border border-ink-100/50 text-[11px] font-semibold">
                     <div className="flex items-center gap-1.5 text-ink-900 font-bold">
                       <span className="text-ink-500 font-medium">Line total</span>
                       <span className="text-xs bg-white border border-ink-100 px-2.5 py-1 rounded-lg font-mono tabular-nums">

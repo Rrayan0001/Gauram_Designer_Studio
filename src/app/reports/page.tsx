@@ -14,8 +14,6 @@ interface Invoice {
   invoiceDate: string
   status: string
   subtotal: number
-  cgstAmount: number
-  sgstAmount: number
   totalAmount: number
   amountPaid: number
   pendingAmount: number
@@ -85,9 +83,6 @@ export default function ReportsPage() {
   }, [datePreset, invoices, fy])
 
   const totalSales = filteredInvoices.reduce((sum, inv) => sum + inv.totalAmount, 0)
-  const totalCGST = filteredInvoices.reduce((sum, inv) => sum + inv.cgstAmount, 0)
-  const totalSGST = filteredInvoices.reduce((sum, inv) => sum + inv.sgstAmount, 0)
-  const totalTax = totalCGST + totalSGST
   const totalBillsCount = filteredInvoices.length
 
   const categoryStats: Record<string, { count: number; total: number }> = {
@@ -131,11 +126,11 @@ export default function ReportsPage() {
       toast.info('No invoices to export for this range')
       return
     }
-    const headers = 'Invoice ID,Customer Name,Customer Phone,Date,Payment Mode,Subtotal,CGST,SGST,Grand Total\n'
+    const headers = 'Invoice ID,Customer Name,Customer Phone,Date,Payment Mode,Subtotal,Grand Total\n'
     const rows = filteredInvoices.map((inv) => {
       const name = inv.customer.name.replace(/,/g, ' ')
       const date = fmtDateIN(inv.invoiceDate)
-      return `"${inv.orderId || 'Draft'}","${name}","${inv.customer.phone}","${date}","${inv.paymentMode}",${inv.subtotal},${inv.cgstAmount},${inv.sgstAmount},${inv.totalAmount}\n`
+      return `"${inv.orderId || 'Draft'}","${name}","${inv.customer.phone}","${date}","${inv.paymentMode}",${inv.subtotal},${inv.totalAmount}\n`
     })
     const blob = new Blob([headers, ...rows], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
@@ -176,7 +171,7 @@ export default function ReportsPage() {
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pb-4 border-b border-ink-100">
         <PageHeader
           title="Studio revenue reports"
-          description="GST filing helpers, collections, and sales ledger"
+          description="Collections, category breakdown, and sales ledger"
           className="border-0 pb-0"
         />
         <div className="flex items-center gap-2 w-full lg:w-auto">
@@ -211,16 +206,16 @@ export default function ReportsPage() {
           icon={<TrendingUp className="w-4 h-4" />}
         />
         <StatCard
-          label="GST tax collected"
-          value={fmtINR(totalTax)}
-          sub={`CGST ${fmtINR(totalCGST)} · SGST ${fmtINR(totalSGST)}`}
-          icon={<Scale className="w-4 h-4" />}
+          label="Average bill value"
+          value={fmtINR(totalBillsCount > 0 ? totalSales / totalBillsCount : 0)}
+          sub="Per customer order"
+          icon={<Receipt className="w-4 h-4" />}
         />
         <StatCard
           label="Invoices billed"
           value={String(totalBillsCount)}
-          sub={`Avg ${fmtINR(totalBillsCount > 0 ? totalSales / totalBillsCount : 0)}`}
-          icon={<Receipt className="w-4 h-4" />}
+          sub="Printed receipts"
+          icon={<History className="w-4 h-4" />}
         />
       </div>
 
