@@ -1,8 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import Sidebar from "@/components/Sidebar";
-import { ToastProvider } from "@/components/ui/Toast";
+import AppLayoutWrapper from "@/components/AppLayoutWrapper";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const display = Cormorant_Garamond({
@@ -36,18 +35,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${inter.variable} ${display.variable} ${jetbrainsMono.variable} h-full`}
       suppressHydrationWarning
     >
-      <body className="h-full flex flex-col md:flex-row antialiased font-sans" suppressHydrationWarning>
-        <ToastProvider>
-          <Sidebar />
-          <main id="main" tabIndex={-1} className="flex-1 overflow-auto bg-paper md:min-h-screen outline-none flex flex-col">
-            <div className="p-4 md:p-8 pb-24 md:pb-8 flex-1">
-              {children}
-            </div>
-            <footer className="no-print text-center text-[11px] text-ink-400 pt-4 pb-24 md:pb-4 border-t border-ink-100 select-none bg-white/20">
-              <p>Developed by <a href="https://kreosoftwares.in" target="_blank" rel="noopener noreferrer" className="text-gold-600 hover:underline font-semibold">Kreo Software</a></p>
-            </footer>
-          </main>
-        </ToastProvider>
+      <body className="h-full min-h-screen w-full antialiased font-sans bg-[#14120e]" suppressHydrationWarning>
+        <AppLayoutWrapper>{children}</AppLayoutWrapper>
       </body>
     </html>
   );

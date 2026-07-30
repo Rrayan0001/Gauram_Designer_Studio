@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import {
   LayoutDashboard,
@@ -16,10 +16,12 @@ import {
   X,
   Keyboard,
   Search,
+  LogOut,
 } from 'lucide-react'
 import CommandPalette from './CommandPalette'
 import { cn } from '@/lib/cn'
 import { fmtDateIN } from '@/lib/format'
+import { clearSessionCookie } from '@/lib/auth'
 
 const links = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -38,6 +40,7 @@ const mobileTabs = [
 
 export default function Sidebar() {
   const pathname = usePathname()
+  const router = useRouter()
   const [collapsed, setCollapsed] = useState(() => {
     if (typeof window === 'undefined') return false
     try {
@@ -49,6 +52,12 @@ export default function Sidebar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [commandOpen, setCommandOpen] = useState(false)
   const [todayDate] = useState(() => fmtDateIN(new Date()))
+
+  const handleLogout = () => {
+    clearSessionCookie()
+    window.dispatchEvent(new Event('gds-auth-change'))
+    router.replace('/login')
+  }
 
   useEffect(() => {
     const handleGlobalKey = (e: KeyboardEvent) => {
@@ -171,9 +180,20 @@ export default function Sidebar() {
               })}
             </nav>
 
-            <div className="border-t border-ink-100 pt-4 text-center text-[11px] text-ink-400 space-y-1">
-              <p>© 2026 Gauram Studio</p>
-              <p>Developed by <a href="https://kreosoftwares.in" target="_blank" rel="noopener noreferrer" className="text-gold-600 hover:underline font-semibold">Kreo Software</a></p>
+            <div className="border-t border-ink-100 pt-3 space-y-3">
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold text-rose-600 hover:bg-rose-50 transition-colors"
+              >
+                <LogOut className="w-4 h-4 text-rose-500" />
+                <span>Sign Out</span>
+              </button>
+
+              <div className="text-center text-[11px] text-ink-400 space-y-0.5">
+                <p>© 2026 Gauram Studio</p>
+                <p>Developed by <a href="https://kreosoftwares.in" target="_blank" rel="noopener noreferrer" className="text-gold-600 hover:underline font-semibold">Kreo Software</a></p>
+              </div>
             </div>
           </div>
         </div>
@@ -251,12 +271,25 @@ export default function Sidebar() {
             </div>
           )}
 
-          <div className="px-2 py-3">
+          <div className="px-2 py-2 space-y-1">
+            <button
+              type="button"
+              onClick={handleLogout}
+              title={collapsed ? 'Sign Out' : undefined}
+              className={cn(
+                'w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-medium text-rose-600 hover:bg-rose-50 transition-colors min-h-[40px]',
+                collapsed && 'justify-center'
+              )}
+            >
+              <LogOut className="w-4 h-4 flex-shrink-0 text-rose-500" />
+              {!collapsed && <span>Sign Out</span>}
+            </button>
+
             <button
               type="button"
               onClick={toggleCollapsed}
               className={cn(
-                'w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-medium text-ink-400 hover:bg-ink-100/30 hover:text-ink-900 transition-colors min-h-[44px]',
+                'w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-medium text-ink-400 hover:bg-ink-100/30 hover:text-ink-900 transition-colors min-h-[40px]',
                 collapsed && 'justify-center'
               )}
               aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
