@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Trash2, Printer, Phone, Check } from 'lucide-react'
 import { useToast } from '@/components/ui/Toast'
-import { ConfirmDialog, Button, Skeleton, Badge } from '@/components/ui/Kit'
+import { ConfirmDialog, Button, Skeleton } from '@/components/ui/Kit'
 import { fmtINRExact, fmtDateIN, fmtPhone } from '@/lib/format'
 
 interface InvoiceItem {
@@ -81,7 +81,13 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
     }
   }
 
-  const handlePrint = () => window.print()
+  const handlePrint = () => {
+    try {
+      window.print()
+    } catch {
+      toast.info('Tip: use Cmd/Ctrl+P or the Share menu to print as PDF')
+    }
+  }
 
   const handleWhatsAppShare = () => {
     if (!invoice) return

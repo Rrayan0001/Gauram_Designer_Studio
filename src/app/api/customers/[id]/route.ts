@@ -37,9 +37,10 @@ export async function GET(
     }
 
     return NextResponse.json(result)
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching customer detail:', error)
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 })
+    const message = error instanceof Error ? error.message : 'Internal Server Error'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
 
@@ -71,7 +72,7 @@ export async function PUT(
       }
     }
 
-    const updateData: any = {}
+    const updateData: { name?: string; phone?: string; address?: string | null; notes?: string } = {}
     if (name !== undefined) updateData.name = name.trim()
     if (phone !== undefined) updateData.phone = phone.trim()
     if (address !== undefined) updateData.address = address.trim() || null
@@ -83,9 +84,10 @@ export async function PUT(
     })
 
     return NextResponse.json(updated)
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error updating customer details:', error)
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 })
+    const message = error instanceof Error ? error.message : 'Internal Server Error'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
 
@@ -128,8 +130,9 @@ export async function DELETE(
     })
 
     return NextResponse.json({ message: 'Customer and all associated records deleted successfully' })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error deleting customer:', error)
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 })
+    const message = error instanceof Error ? error.message : 'Internal Server Error'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

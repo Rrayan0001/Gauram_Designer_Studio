@@ -7,7 +7,26 @@ import Link from 'next/link'
 
 export default function EditInvoicePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
-  const [invoice, setInvoice] = useState<any>(null)
+  interface InvoiceItemInput {
+    description: string
+    category?: string
+    quantity: number
+    rate: number
+    amount?: number
+  }
+  interface InvoiceData {
+    id: string
+    customerId?: string
+    customer?: { name: string; phone: string; address?: string }
+    invoiceDate?: string
+    paymentMode?: string
+    subtotal?: number
+    discountAmount?: number
+    status?: string
+    items?: InvoiceItemInput[]
+  }
+
+  const [invoice, setInvoice] = useState<InvoiceData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -55,5 +74,5 @@ export default function EditInvoicePage({ params }: { params: Promise<{ id: stri
     )
   }
 
-  return <InvoiceForm initialInvoice={invoice} />
+  return <InvoiceForm initialInvoice={invoice ?? undefined} />
 }

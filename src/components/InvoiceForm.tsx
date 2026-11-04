@@ -90,7 +90,7 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
   const [items, setItems] = useState<InvoiceItemInput[]>(
     initialInvoice?.items?.map((item) => {
       const cat = item.category || "Women's Wear"
-      const isStd = CATEGORIES.includes(cat as any)
+      const isStd = (CATEGORIES as string[]).includes(cat)
       return {
         description: item.description,
         category: isStd ? cat : 'Other',
@@ -295,7 +295,7 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
     setSubmitting(true)
 
     const payloadItems = items.map((item) => {
-      const isStd = CATEGORIES.includes(item.category as any) && item.category !== 'Other'
+      const isStd = (CATEGORIES as string[]).includes(item.category) && item.category !== 'Other'
       const finalCategory = isStd
         ? item.category
         : (item.customCategory?.trim() || (item.category !== 'Other' ? item.category : 'Other'))
@@ -663,7 +663,7 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
                     <div className="md:col-span-3 space-y-1">
                       <label className={labelCls}>Category</label>
                       <select
-                        value={CATEGORIES.includes(item.category as any) ? item.category : 'Other'}
+                        value={(CATEGORIES as string[]).includes(item.category) ? item.category : 'Other'}
                         onChange={(e) => {
                           const val = e.target.value
                           handleItemChange(index, 'category', val)
@@ -682,12 +682,12 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
                         ))}
                         <option value="Other">+ Other (Custom)</option>
                       </select>
-                      {(!CATEGORIES.includes(item.category as any) || item.category === 'Other') && (
+                      {(!(CATEGORIES as string[]).includes(item.category) || item.category === 'Other') && (
                         <div className="pt-1.5">
                           <input
                             type="text"
                             placeholder="Enter custom category"
-                            value={item.customCategory !== undefined ? item.customCategory : (CATEGORIES.includes(item.category as any) ? '' : item.category === 'Other' ? '' : item.category)}
+                            value={item.customCategory !== undefined ? item.customCategory : ((CATEGORIES as string[]).includes(item.category) ? '' : item.category === 'Other' ? '' : item.category)}
                             onChange={(e) => {
                               const val = e.target.value
                               setItems((prev) =>

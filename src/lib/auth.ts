@@ -1,6 +1,6 @@
 export const AUTH_CREDENTIALS = {
-  username: 'admin',
-  password: 'admin123456@gauram',
+  username: process.env.NEXT_PUBLIC_ADMIN_USER || 'admin',
+  password: process.env.NEXT_PUBLIC_ADMIN_PASS || 'admin123456@gauram',
 }
 
 export const AUTH_COOKIE_NAME = 'gds_session'
@@ -18,7 +18,7 @@ export function setSessionCookie() {
 
 export function clearSessionCookie() {
   if (typeof document !== 'undefined') {
-    document.cookie = `${AUTH_COOKIE_NAME}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`
+    document.cookie = `${AUTH_COOKIE_NAME}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax`
     try {
       localStorage.removeItem(AUTH_COOKIE_NAME)
     } catch {

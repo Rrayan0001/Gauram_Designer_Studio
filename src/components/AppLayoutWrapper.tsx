@@ -14,15 +14,17 @@ export default function AppLayoutWrapper({ children }: { children: React.ReactNo
   const isLoginPage = pathname === '/login'
 
   useEffect(() => {
-    const isAuth = isAuthenticated()
-    setAuthed(isAuth)
-    setMounted(true)
-
-    if (!isAuth && !isLoginPage) {
-      router.replace('/login')
-    } else if (isAuth && isLoginPage) {
-      router.replace('/')
-    }
+    const t = window.setTimeout(() => {
+      const isAuth = isAuthenticated()
+      setAuthed(isAuth)
+      setMounted(true)
+      if (!isAuth && !isLoginPage) {
+        router.replace('/login')
+      } else if (isAuth && isLoginPage) {
+        router.replace('/')
+      }
+    }, 0)
+    return () => window.clearTimeout(t)
   }, [isLoginPage, router, pathname])
 
   useEffect(() => {

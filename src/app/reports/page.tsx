@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { TrendingUp, History, Tag, Download, Receipt, Scale, ChevronRight } from 'lucide-react'
+import { TrendingUp, History, Tag, Download, Receipt, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { Card, Skeleton, StatCard, Badge, EmptyState, PageHeader, Button } from '@/components/ui/Kit'
 import { useToast } from '@/components/ui/Toast'
