@@ -82,11 +82,85 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
   }
 
   const handlePrint = () => {
-    try {
-      window.print()
-    } catch {
-      toast.info('Tip: use Cmd/Ctrl+P or the Share menu to print as PDF')
+    const node = document.querySelector('.print-container') as HTMLElement | null
+    if (!node) {
+      try {
+        window.print()
+      } catch {
+        toast.info('Tip: use Cmd/Ctrl+P or the Share menu to print as PDF')
+      }
+      return
     }
+
+    const win = window.open('', '_blank', 'width=900,height=1000')
+    if (!win) {
+      try {
+        window.print()
+      } catch {
+        toast.info('Tip: use Cmd/Ctrl+P or the Share menu to print as PDF')
+      }
+      return
+    }
+
+    const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
+      .map((el) => {
+        if (el.tagName === 'LINK') {
+          const link = el as HTMLLinkElement
+          try {
+            const href = new URL(link.href, window.location.href).href
+            return `<link rel="stylesheet" href="${href}" />`
+          } catch {
+            return el.outerHTML
+          }
+        }
+        return el.outerHTML
+      })
+      .join('\n')
+
+    const printAndClose = () => {
+      try {
+        win.focus()
+        win.print()
+      } catch {
+        // ignore
+      }
+      setTimeout(() => {
+        try {
+          win.close()
+        } catch {
+          // ignore
+        }
+      }, 1000)
+    }
+
+    win.document.open()
+    win.document.write(
+      `<!DOCTYPE html><html><head><meta charset="utf-8" /><title>Invoice</title>${styles}<style>
+        @page { size: A4 portrait; margin: 12mm; }
+        html, body { margin: 0; padding: 0; background: #ffffff; color: #1a1814; }
+        body { display: flex; justify-content: center; }
+        .print-container { box-shadow: none !important; border-radius: 0 !important; margin: 0 !important; width: 100% !important; max-width: none !important; }
+      </style></head><body>${node.outerHTML}</body></html>`
+    )
+    win.document.close()
+
+    const images = Array.from(win.document.images)
+    if (images.length === 0) {
+      setTimeout(printAndClose, 300)
+      return
+    }
+    let remaining = images.length
+    const onDone = () => {
+      remaining -= 1
+      if (remaining <= 0) printAndClose()
+    }
+    images.forEach((img) => {
+      if (img.complete) onDone()
+      else {
+        img.onload = onDone
+        img.onerror = onDone
+      }
+    })
   }
 
   const handleWhatsAppShare = () => {

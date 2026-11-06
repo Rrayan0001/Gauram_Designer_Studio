@@ -130,6 +130,21 @@ input[type="number"] {
 
 /* Print optimizations */
 @media print {
+  *, *::before, *::after {
+    overflow: visible !important;
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+    -webkit-transform: none !important;
+  }
+  .fixed, .sticky {
+    position: static !important;
+  }
+  html, body, main, #main {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
   html, body {
     width: 100% !important;
     height: auto !important;
@@ -161,8 +176,8 @@ input[type="number"] {
     background: #ffffff !important;
     color: #1a1814 !important;
     box-sizing: border-box !important;
-    break-inside: avoid !important;
-    page-break-inside: avoid !important;
+    /* break-inside: avoid !important; */
+    /* page-break-inside: avoid !important; */
   }
 
   /* Suppress all the decorative spacing that bleeds the layout into 2 pages */
