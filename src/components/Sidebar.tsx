@@ -167,7 +167,7 @@ export default function Sidebar() {
                     href={href}
                     onClick={() => setMobileOpen(false)}
                     className={cn(
-                      'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors',
+                      'flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-semibold transition-colors min-h-[44px]',
                       active
                         ? 'bg-gold-100 text-ink-900 border border-gold-600/20'
                         : 'text-ink-700 hover:bg-ink-100/40 hover:text-ink-900'
@@ -184,7 +184,7 @@ export default function Sidebar() {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold text-rose-600 hover:bg-rose-50 transition-colors"
+                className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-semibold text-rose-600 hover:bg-rose-50 transition-colors min-h-[44px]"
               >
                 <LogOut className="w-4 h-4 text-rose-500" />
                 <span>Sign Out</span>
@@ -202,7 +202,7 @@ export default function Sidebar() {
       {/* Desktop sidebar */}
       <aside
         className={cn(
-          'no-print hidden md:flex flex-col min-h-screen bg-white border-r border-ink-100 select-none flex-shrink-0 transition-all duration-300',
+          'no-print hidden md:flex flex-col h-dvh sticky top-0 overflow-y-auto bg-white border-r border-ink-100 select-none flex-shrink-0 transition-all duration-300 scroll-y',
           collapsed ? 'w-16' : 'w-60'
         )}
       >
@@ -231,9 +231,10 @@ export default function Sidebar() {
               <Link
                 key={name}
                 href={href}
-                title={collapsed ? name : undefined}
+                 title={collapsed ? name : undefined}
+                 aria-label={name}
                 className={cn(
-                  'relative flex items-center gap-3 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-150',
+                      'relative flex items-center gap-3 py-3 rounded-lg text-xs font-semibold tracking-wide transition-all duration-150 min-h-[44px]',
                   active
                     ? 'bg-gold-100/80 text-ink-900 pl-3.5'
                     : 'text-ink-500 hover:bg-ink-100/50 hover:text-ink-900 pl-3.5',
@@ -255,7 +256,7 @@ export default function Sidebar() {
             <button
               type="button"
               onClick={() => setCommandOpen(true)}
-              className="w-[calc(100%-1rem)] px-3 py-2.5 mx-2 my-2 bg-ink-100/30 border border-ink-100 rounded-lg hover:bg-ink-100/60 cursor-pointer flex items-center justify-between text-[11px] text-ink-500 font-medium transition-colors text-left"
+              className="w-[calc(100%-1rem)] px-3 py-3 mx-2 my-2 bg-ink-100/30 border border-ink-100 rounded-lg hover:bg-ink-100/60 cursor-pointer flex items-center justify-between text-[11px] text-ink-500 font-medium transition-colors text-left min-h-[44px]"
             >
               <span className="flex items-center gap-1.5">
                 <Keyboard className="w-3.5 h-3.5 text-ink-300" /> Shortcuts
@@ -277,7 +278,7 @@ export default function Sidebar() {
               onClick={handleLogout}
               title={collapsed ? 'Sign Out' : undefined}
               className={cn(
-                'w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-medium text-rose-600 hover:bg-rose-50 transition-colors min-h-[40px]',
+                'w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-medium text-rose-600 hover:bg-rose-50 transition-colors min-h-[44px]',
                 collapsed && 'justify-center'
               )}
             >
@@ -289,7 +290,7 @@ export default function Sidebar() {
               type="button"
               onClick={toggleCollapsed}
               className={cn(
-                'w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-medium text-ink-400 hover:bg-ink-100/30 hover:text-ink-900 transition-colors min-h-[40px]',
+                'w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-medium text-ink-400 hover:bg-ink-100/30 hover:text-ink-900 transition-colors min-h-[44px]',
                 collapsed && 'justify-center'
               )}
               aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}

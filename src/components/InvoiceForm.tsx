@@ -395,7 +395,7 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
               }
             }}
             className={cn(
-              'px-2.5 py-1 rounded-md transition-all cursor-pointer',
+              'px-3 py-2 rounded-md transition-all cursor-pointer min-h-[44px]',
               discountType === 'fixed'
                 ? 'bg-white text-ink-900 shadow-sm border border-ink-100/40'
                 : 'text-ink-500 hover:text-ink-900'
@@ -413,7 +413,7 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
               }
             }}
             className={cn(
-              'px-2.5 py-1 rounded-md transition-all cursor-pointer',
+              'px-3 py-2 rounded-md transition-all cursor-pointer min-h-[44px]',
               discountType === 'percent'
                 ? 'bg-white text-ink-900 shadow-sm border border-ink-100/40'
                 : 'text-ink-500 hover:text-ink-900'
@@ -616,7 +616,7 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
                   key={tpl.label}
                   type="button"
                   onClick={() => applyTemplate(tpl)}
-                  className="text-[11px] font-semibold px-3 py-1.5 rounded-full border border-ink-100 bg-white text-ink-600 hover:border-gold-600/40 hover:bg-gold-100/40 hover:text-ink-900 transition-colors"
+                  className="text-xs font-semibold px-4 py-2.5 rounded-full border border-ink-100 bg-white text-ink-600 hover:border-gold-600/40 hover:bg-gold-100/40 hover:text-ink-900 transition-colors min-h-[44px]"
                 >
                   {tpl.label}
                 </button>
@@ -649,8 +649,8 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
                     )}
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-                    <div className="md:col-span-5 space-y-1">
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-end">
+                    <div className="lg:col-span-5 space-y-1">
                       <label className={labelCls}>Description</label>
                       <input
                         type="text"
@@ -660,7 +660,7 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
                         className={inputCls}
                       />
                     </div>
-                    <div className="md:col-span-3 space-y-1">
+                    <div className="lg:col-span-3 space-y-1">
                       <label className={labelCls}>Category</label>
                       <select
                         value={(CATEGORIES as string[]).includes(item.category) ? item.category : 'Other'}
@@ -699,7 +699,7 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
                         </div>
                       )}
                     </div>
-                    <div className="md:col-span-1 space-y-1">
+                    <div className="lg:col-span-1 space-y-1">
                       <label className={labelCls}>Qty</label>
                       <input
                         type="number"
@@ -710,7 +710,7 @@ export default function InvoiceForm({ initialInvoice }: InvoiceFormProps) {
                         className={cn(inputCls, 'text-center')}
                       />
                     </div>
-                    <div className="md:col-span-3 space-y-1">
+                    <div className="lg:col-span-3 space-y-1">
                       <label className={labelCls}>Rate (₹)</label>
                       <div className="relative rounded-xl border border-ink-100 bg-white focus-within:border-gold-600 focus-within:ring-2 focus-within:ring-gold-600/15">
                         <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-ink-400 text-xs">

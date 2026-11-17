@@ -265,7 +265,7 @@ export default function Dashboard() {
                 type="button"
                 onClick={() => applyPreset(p.id)}
                 className={cn(
-                  'px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all min-h-[36px]',
+                  'px-4 py-2 rounded-lg text-[11px] font-bold transition-all min-h-[44px]',
                   preset === p.id ? 'bg-ink-900 text-white' : 'bg-white border border-ink-100 text-ink-500 hover:text-ink-900'
                 )}
               >
@@ -274,8 +274,8 @@ export default function Dashboard() {
             ))}
           </div>
 
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="flex gap-2 w-full md:max-w-md">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div className="flex gap-2 w-full lg:max-w-md">
               <div className="relative flex-1">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-300" />
                 <input
@@ -283,7 +283,7 @@ export default function Dashboard() {
                   placeholder="Search orders or clients…"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pr-4 py-2.5 text-sm border border-ink-100 rounded-xl focus:outline-none focus:border-ink-500 focus:ring-1 focus:ring-ink-550/20 bg-white placeholder-ink-400 text-ink-900 font-medium input-mobile-lg"
+                  className="w-full pr-4 py-2.5 text-sm border border-ink-100 rounded-xl focus:outline-none focus:border-ink-500 focus:ring-2 focus:ring-gold-600/20 bg-white placeholder-ink-400 text-ink-900 font-medium input-mobile-lg"
                   style={{ paddingLeft: '2.5rem' }}
                 />
               </div>
@@ -294,7 +294,7 @@ export default function Dashboard() {
                   setPreset('custom')
                 }}
                 className={cn(
-                  'md:hidden flex items-center justify-center p-2.5 rounded-xl border transition-all min-w-[44px] min-h-[44px]',
+                  'lg:hidden flex items-center justify-center p-2.5 rounded-xl border transition-all min-w-[44px] min-h-[44px]',
                   showMobileFilters || startDate || endDate
                     ? 'bg-ink-900 border-ink-900 text-white'
                     : 'bg-white border-ink-100 text-ink-500'
@@ -308,10 +308,10 @@ export default function Dashboard() {
             <div
               className={cn(
                 showMobileFilters ? 'flex' : 'hidden',
-                'md:flex flex-col md:flex-row flex-wrap items-center gap-3 w-full md:w-auto'
+                'lg:flex flex-col lg:flex-row flex-wrap items-center gap-3 w-full lg:w-auto'
               )}
             >
-              <div className="flex items-center gap-2 bg-white px-3 py-2 border border-ink-100 rounded-xl w-full md:w-auto justify-between">
+              <div className="flex items-center gap-2 bg-white px-3 py-2 border border-ink-100 rounded-xl w-full lg:w-auto justify-between">
                 <input
                   type="date"
                   value={startDate}
@@ -340,7 +340,7 @@ export default function Dashboard() {
                     setSearch('')
                     applyPreset('all')
                   }}
-                  className="flex items-center justify-center gap-1.5 text-xs text-ink-500 hover:text-ink-900 px-3 py-2.5 rounded-xl border border-ink-100 hover:border-ink-300 transition-colors w-full md:w-auto min-h-[44px]"
+                  className="flex items-center justify-center gap-1.5 text-xs text-ink-500 hover:text-ink-900 px-3 py-2.5 rounded-xl border border-ink-100 hover:border-ink-300 transition-colors w-full lg:w-auto min-h-[44px]"
                 >
                   <RotateCcw className="w-3.5 h-3.5" /> Reset
                 </button>
@@ -350,7 +350,7 @@ export default function Dashboard() {
         </div>
 
         {/* Desktop table */}
-        <div className="hidden md:block overflow-x-auto">
+        <div className="hidden lg:block overflow-x-auto scroll-y">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-ink-100 bg-paper/50 text-left">
@@ -414,7 +414,7 @@ export default function Dashboard() {
                     <td className="px-5 py-4 text-center">
                       <Link
                         href={`/invoices/${inv.id}`}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-ink-100 hover:border-ink-300 hover:bg-ink-100/30 text-ink-700 text-[11px] font-bold transition-all"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-ink-100 hover:border-ink-300 hover:bg-ink-100/30 text-ink-700 text-[11px] font-bold transition-all min-h-[44px]"
                       >
                         Receipt <ArrowRight className="w-3 h-3" />
                       </Link>
@@ -426,8 +426,8 @@ export default function Dashboard() {
           </table>
         </div>
 
-        {/* Mobile list */}
-        <div className="md:hidden divide-y divide-ink-100 scroll-y">
+        {/* Mobile / tablet list */}
+        <div className="lg:hidden divide-y divide-ink-100 scroll-y">
           {loading ? (
             <div className="p-4 space-y-3">
               <Skeleton className="h-14 w-full" />

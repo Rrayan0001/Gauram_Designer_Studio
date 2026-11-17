@@ -269,7 +269,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
             <h3 className="text-sm font-bold text-ink-900">Order history</h3>
           </div>
 
-          <div className="hidden md:block overflow-x-auto">
+          <div className="hidden lg:block overflow-x-auto scroll-y">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-ink-100 bg-paper/50 text-left">
@@ -308,7 +308,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
             </table>
           </div>
 
-          <div className="md:hidden divide-y divide-ink-100 scroll-y">
+          <div className="lg:hidden divide-y divide-ink-100 scroll-y">
             {customer.invoices.length === 0 ? (
               <div className="text-center py-10 text-ink-400 text-sm font-semibold">No orders yet</div>
             ) : (

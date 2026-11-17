@@ -65,7 +65,7 @@ export default function AppLayoutWrapper({ children }: { children: React.ReactNo
       <div className="min-h-screen w-full flex-1 flex flex-col md:flex-row bg-paper antialiased">
         <Sidebar />
         <main id="main" tabIndex={-1} className="flex-1 overflow-auto bg-paper md:min-h-screen outline-none flex flex-col">
-          <div className="p-4 md:p-8 pb-24 md:pb-8 flex-1">
+          <div className="p-4 md:p-6 lg:p-8 pb-24 md:pb-8 flex-1">
             {children}
           </div>
           <footer className="no-print text-center text-[11px] text-ink-400 pt-4 pb-24 md:pb-4 border-t border-ink-100 select-none bg-white/20">

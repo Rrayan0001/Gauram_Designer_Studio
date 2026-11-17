@@ -175,13 +175,13 @@ export default function CustomersPage() {
               placeholder="Search customers…"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pr-4 py-2.5 text-base md:text-sm border border-ink-100 rounded-xl focus:outline-none focus:border-ink-500 focus:ring-1 focus:ring-ink-550/20 bg-white placeholder-ink-400 text-ink-900 font-medium input-mobile-lg"
+              className="w-full pr-4 py-2.5 text-base md:text-sm border border-ink-100 rounded-xl focus:outline-none focus:border-ink-500 focus:ring-2 focus:ring-gold-600/20 bg-white placeholder-ink-400 text-ink-900 font-medium input-mobile-lg"
               style={{ paddingLeft: '2.5rem' }}
             />
           </div>
         </div>
 
-        <div className="hidden md:block overflow-x-auto">
+        <div className="hidden lg:block overflow-x-auto scroll-y">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-ink-100 bg-paper/50 text-left">
@@ -231,7 +231,7 @@ export default function CustomersPage() {
                     <td className="px-5 py-4 text-center">
                       <Link
                         href={`/customers/${c.id}`}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-ink-100 hover:border-ink-300 hover:bg-ink-100/30 text-ink-700 text-[11px] font-bold"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-ink-100 hover:border-ink-300 hover:bg-ink-100/30 text-ink-700 text-[11px] font-bold min-h-[44px]"
                       >
                         <Eye className="w-3.5 h-3.5" /> View
                       </Link>
@@ -243,7 +243,7 @@ export default function CustomersPage() {
           </table>
         </div>
 
-        <div className="md:hidden divide-y divide-ink-100 scroll-y">
+        <div className="lg:hidden divide-y divide-ink-100 scroll-y">
           {loading ? (
             <div className="p-4 space-y-3">
               <Skeleton className="h-14 w-full" />

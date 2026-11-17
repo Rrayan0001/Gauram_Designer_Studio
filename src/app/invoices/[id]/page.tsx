@@ -121,7 +121,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
         win.focus()
         win.print()
       } catch {
-        // ignore
+        toast.info('Use the Share menu to print or save this receipt as PDF')
       }
       setTimeout(() => {
         try {
@@ -380,7 +380,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
           </div>
 
           {/* Line items table */}
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto scroll-y">
             <table className="w-full text-left text-sm border-collapse">
               <thead>
                 <tr className="border-b-2 border-gold-600/40 text-ink-500 font-bold tracking-wide text-[11px] uppercase">

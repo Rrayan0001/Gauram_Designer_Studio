@@ -2,6 +2,7 @@
 
 import React, { useEffect, useId, useRef } from 'react'
 import Link from 'next/link'
+import { X } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { getInitials } from '@/lib/format'
 
@@ -34,7 +35,7 @@ export function Button({
   }
 
   const sizes = {
-    sm: 'px-3 py-1.5 text-xs min-h-[36px]',
+    sm: 'px-3 py-2 text-xs min-h-[44px]',
     md: 'px-4 py-2.5 text-sm min-h-[44px]',
     lg: 'px-6 py-3.5 text-base min-h-[48px]',
   }
@@ -205,10 +206,15 @@ export function Field({
   children: React.ReactNode
   className?: string
 }) {
+  const generatedId = useId()
+  const child = children as React.ReactElement<{ id?: string }>
+  const hasId = React.isValidElement(child) && Boolean(child.props.id)
+  const inputId = hasId ? child.props.id : generatedId
+
   return (
     <div className={cn('space-y-1', className)}>
-      {label && <label className={fieldLabelCls}>{label}</label>}
-      {children}
+      {label && <label htmlFor={inputId} className={fieldLabelCls}>{label}</label>}
+      {hasId ? children : React.isValidElement(child) ? React.cloneElement(child, { id: inputId }) : children}
       {error && <p className="text-[11px] text-rose-600 font-medium mt-1">{error}</p>}
       {hint && !error && <p className="text-[11px] text-ink-500 font-medium mt-1">{hint}</p>}
     </div>
@@ -354,7 +360,15 @@ export function Modal({ open, onClose, title, children, sheet = false, className
           className
         )}
       >
-        <h3 id={titleId} className="font-serif text-sm font-bold tracking-wide text-ink-900 mb-3">
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close dialog"
+          className="absolute right-3 top-3 flex items-center justify-center rounded-lg text-ink-400 hover:text-ink-900 hover:bg-ink-100/40 min-w-[44px] min-h-[44px] focus-visible:ring-2 focus-visible:ring-gold-600/40"
+        >
+          <X className="w-4 h-4" />
+        </button>
+        <h3 id={titleId} className="font-serif text-sm font-bold tracking-wide text-ink-900 mb-3 pr-10">
           {title}
         </h3>
         {children}

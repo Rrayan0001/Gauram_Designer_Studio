@@ -1,12 +1,20 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import { AUTH_CREDENTIALS, setSessionCookie, isAuthenticated } from '@/lib/auth'
 import { Eye, EyeOff, Lock, User, ArrowRight, AlertCircle } from 'lucide-react'
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen w-full bg-[#14120e]" />}>
+      <LoginForm />
+    </Suspense>
+  )
+}
+
+function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirect = searchParams.get('redirect') || '/'
@@ -142,7 +150,7 @@ export default function LoginPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                   title={showPassword ? 'Hide password' : 'Show password'}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center text-[#8a8175] hover:text-[#c9a961] focus:text-[#c9a961] transition-colors cursor-pointer z-10 p-1"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center text-[#8a8175] hover:text-[#c9a961] focus:text-[#c9a961] transition-colors cursor-pointer z-10 min-w-[44px] min-h-[44px]"
                 >
                   {showPassword ? (
                     <EyeOff className="w-4 h-4 text-[#c9a961]" />
