@@ -81,7 +81,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
     }
   }
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
     const node = document.querySelector('.print-container') as HTMLElement | null
     if (!node) {
       try {
@@ -102,19 +102,18 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
       return
     }
 
-    const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
-      .map((el) => {
-        if (el.tagName === 'LINK') {
-          const link = el as HTMLLinkElement
-          try {
-            const href = new URL(link.href, window.location.href).href
-            return `<link rel="stylesheet" href="${href}" />`
-          } catch {
-            return el.outerHTML
-          }
+    const styles = Array.from(document.styleSheets)
+      .map((sheet) => {
+        try {
+          return Array.from(sheet.cssRules)
+            .map((rule) => rule.cssText)
+            .join('\n')
+        } catch {
+          return ''
         }
-        return el.outerHTML
       })
+      .filter(Boolean)
+      .map((css) => `<style>${css.replace(/<\/style/gi, '<\\/style')}</style>`)
       .join('\n')
 
     const printAndClose = () => {
@@ -133,6 +132,25 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
       }, 1000)
     }
 
+    const clone = node.cloneNode(true) as HTMLElement
+    await Promise.all(
+      Array.from(clone.querySelectorAll<HTMLImageElement>('img[src]')).map(async (img) => {
+        const src = new URL(img.getAttribute('src') || '', window.location.href).href
+        try {
+          const blob = await (await fetch(src)).blob()
+          const dataUrl = await new Promise<string>((resolve) => {
+            const reader = new FileReader()
+            reader.onload = () => resolve(String(reader.result))
+            reader.onerror = () => resolve(src)
+            reader.readAsDataURL(blob)
+          })
+          img.setAttribute('src', dataUrl)
+        } catch {
+          img.setAttribute('src', src)
+        }
+      })
+    )
+
     win.document.open()
     win.document.write(
       `<!DOCTYPE html><html><head><meta charset="utf-8" /><title>Invoice</title>${styles}<style>
@@ -140,7 +158,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
         html, body { margin: 0; padding: 0; background: #ffffff; color: #1a1814; }
         body { display: flex; justify-content: center; }
         .print-container { box-shadow: none !important; border-radius: 0 !important; margin: 0 !important; width: 100% !important; max-width: none !important; }
-      </style></head><body>${node.outerHTML}</body></html>`
+      </style></head><body>${clone.outerHTML}</body></html>`
     )
     win.document.close()
 
@@ -304,14 +322,14 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
                 }}
               />
               <div>
-                <h1 className="font-serif text-xl sm:text-2xl font-bold text-ink-900 tracking-wide" style={{ whiteSpace: 'nowrap' }}>
+                <h1 className="font-serif text-xl sm:text-2xl font-bold text-ink-900 tracking-wide break-words">
                   {studioName}
                 </h1>
                 <p className="text-[10px] sm:text-[11px] text-gold-600 tracking-[0.15em] font-serif uppercase font-bold mt-0.5">
                   Designing Dreams, Creating Elegance
                 </p>
                 <div className="text-[10px] sm:text-[11px] text-ink-600 font-light mt-1">
-                  <p className="leading-snug max-w-xs">{settings?.address || 'Budigere Road, Bengaluru'}</p>
+                  <p className="leading-snug max-w-xs break-words">{settings?.address || 'Budigere Road, Bengaluru'}</p>
                   <p className="font-semibold text-ink-900 mt-0.5">Phone: {settings?.phone || '+91 99004 69746'}</p>
                 </div>
               </div>
@@ -345,14 +363,14 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-ink-600 print-grid-2">
               <div>
-                <p className="font-bold text-ink-900 font-serif text-base">{invoice.customer.name}</p>
+                <p className="font-bold text-ink-900 font-serif text-base break-words">{invoice.customer.name}</p>
                 <p className="mt-1 font-semibold font-mono text-xs text-ink-700">{fmtPhone(invoice.customer.phone)}</p>
               </div>
               <div>
                 {invoice.customer.address ? (
                   <>
                     <p className="font-semibold text-ink-900 text-xs">Address</p>
-                    <p className="mt-0.5 leading-relaxed font-light text-xs">{invoice.customer.address}</p>
+                    <p className="mt-0.5 leading-relaxed font-light text-xs break-words">{invoice.customer.address}</p>
                   </>
                 ) : (
                   <p className="text-ink-400 italic text-xs font-light">No billing address provided.</p>
@@ -378,7 +396,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
                   <tr key={item.id} className="text-ink-700">
                     <td className="py-3 px-2 text-center font-mono text-xs">{index + 1}</td>
                     <td className="py-3 px-3">
-                      <span className="font-semibold text-ink-900 block">{item.description}</span>
+                      <span className="font-semibold text-ink-900 block break-words">{item.description}</span>
                       <span className="text-[11px] text-ink-400 font-mono">
                         {item.category}
                       </span>
@@ -400,7 +418,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
               <h4 className="font-semibold text-ink-900 tracking-wide text-[11px] uppercase">
                 Terms & conditions
               </h4>
-              <div className="whitespace-pre-line leading-relaxed font-light text-ink-600">
+              <div className="whitespace-pre-line leading-relaxed font-light text-ink-600 break-words">
                 {invoice.termsText || settings?.termsAndConds}
               </div>
             </div>
@@ -443,14 +461,14 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
               <div className="border-t-2 border-ink-900/40 pt-1.5 font-medium text-ink-900 text-[11px]">Customer Signature</div>
             </div>
             <div className="text-center" style={{ width: '54mm' }}>
-              <p className="font-bold text-ink-900 text-[11px] mb-5">For {studioName}</p>
+              <p className="font-bold text-ink-900 text-[11px] mb-5 break-words">For {studioName}</p>
               <div className="border-t-2 border-ink-900/40 pt-1.5 text-[10px] text-ink-600">Authorized Signatory</div>
             </div>
           </div>
 
           {/* Footer Note */}
           <div className="pt-4 border-t border-gold-600/30 text-center">
-            <p className="text-[11px] text-ink-500">
+            <p className="text-[11px] text-ink-500 break-words">
               Thank you for choosing {studioName}
             </p>
           </div>

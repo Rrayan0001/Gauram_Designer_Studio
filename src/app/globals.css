@@ -125,7 +125,7 @@ input[type="number"] {
 
 @page {
   size: A4 portrait;
-  margin: 0;
+  margin: 12mm;
 }
 
 /* Print optimizations */
@@ -167,8 +167,8 @@ input[type="number"] {
   /* Outer wrapper — fills the printable area, border on all sides */
   .print-container {
     width: 100% !important;
-    margin: 10mm 12mm !important;
-    width: calc(100% - 24mm) !important;
+    max-width: none !important;
+    margin: 0 !important;
     padding: 6mm 8mm !important;
     box-shadow: none !important;
     border: 1.5pt solid #b08d3f !important;
@@ -176,16 +176,26 @@ input[type="number"] {
     background: #ffffff !important;
     color: #1a1814 !important;
     box-sizing: border-box !important;
-    /* break-inside: avoid !important; */
-    /* page-break-inside: avoid !important; */
+    overflow-wrap: anywhere !important;
+  }
+
+  /* App shell padding/width must not shrink or shift the printed bill */
+  #main,
+  #main > div:first-child {
+    max-width: none !important;
+    padding: 0 !important;
+    overflow: visible !important;
   }
 
   /* Suppress all the decorative spacing that bleeds the layout into 2 pages */
+  .print-container .space-y-5,
   .print-container .space-y-6,
   .print-container .space-y-8,
+  .print-container .sm\:space-y-6,
   .print-container .sm\:space-y-8 {
     gap: 0 !important;
   }
+  .print-container .space-y-5 > * + *,
   .print-container .space-y-6 > * + * {
     margin-top: 4mm !important;
   }
@@ -217,6 +227,13 @@ input[type="number"] {
     width: 100% !important;
   }
 
+  /* The 12-column md:col-span classes must not create implicit columns here */
+  .print-grid-split > *,
+  .print-grid-2 > * {
+    grid-column: auto !important;
+    min-width: 0 !important;
+  }
+
   .print-text-right {
     text-align: right !important;
   }
@@ -228,21 +245,41 @@ input[type="number"] {
     justify-content: space-between !important;
     align-items: flex-end !important;
     width: 100% !important;
-    padding-top: 6mm !important;
+    padding-top: 2mm !important;
     margin-top: 0 !important;
   }
 
+  .print-signatures p.mb-5 {
+    margin-bottom: 3mm !important;
+  }
+
   /* Tighten up internal paddings so nothing overflows */
+  .print-container table {
+    table-layout: fixed !important;
+    width: 100% !important;
+  }
+
   .print-container table th,
   .print-container table td {
     padding-top: 3pt !important;
     padding-bottom: 3pt !important;
     font-size: 9pt !important;
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
   }
 
   .print-container h1 {
     font-size: 14pt !important;
     line-height: 1.2 !important;
+    white-space: normal !important;
+  }
+
+  .print-container tr,
+  .print-signatures,
+  .print-grid-split,
+  .print-grid-2 {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
   }
 
   /* Remove rounded corners from billed-to box */
